@@ -1,0 +1,15 @@
+:app_name: Ceedling
+
+:types:
+    - complete:
+        :title: Complete
+        :iconURL: littlesurly_crop.ico
+    - error:
+        :title: Error
+        :iconURL: littlesurly_crop_x.ico
+    - testPassed:
+        :title: Test Passed
+        :iconURL: littlesurly_crop.ico
+    - testFailed:
+        :title: Test Failed
+        :iconURL: littlesurly_crop_x.ico

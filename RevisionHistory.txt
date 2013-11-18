@@ -1,0 +1,380 @@
+//* Revision Notes:                                                     
+//*
+//*
+//*
+//* 29307.01.04.00  11/05/13    Austin Mullins
+//* - Factored ReadingCalculation function out to a separate module. Instrument constants associated
+//*   with reading calculations have been factored to new InstrumentConstants module. These constants
+//*   are loaded during initialization instead of checking every iteration.
+//*
+//* - Factored main loop operations into discernable separate functions
+//*
+//*
+//* 29307.01.03.05  09/04/13    Austin Mullins
+//* - changed the way auto-range is handled. Instead of taking several readings before updating the
+//*   current range, the unit immediately changes routines and restarts an averaging cycle as soon
+//*   as an overrange occurs.
+//*
+//* - changed call to GOLDrawCallback() to GOLDraw() in main loop. I do not know why James chose to
+//*   explicitly call the callback function, which is supposed to be handled by the built-in GOLDraw()
+//*   function from Microchip.
+//*
+//*
+//* 29307.01.03.04  08/29/13    Austin Mullins
+//* - updated to use new Common folder in MPLABX.
+//*
+//* 29307.01.03.03  04/03/13    James Comstock
+//* - fixed bug - should not call structureinit() during hot correction until the last correction is complete
+//*
+//* 29307.01.03.02  04/02/13    James Comstock
+//* - added - temperature correction function will log to log file as an event
+//*
+//* 29307.01.03.01  04/01/13    James Comstock
+//* - change - TIME data logging will now display AM or PM when in 12 hour mode
+//* - change - cleaned up DATE and TIME routines completed in 29307.01.03.00
+//* - change - temperature correction +20C will now start later due to slow chamber temperature increase
+//*
+//* 29307.01.03.00  03/29/13    James Comstock
+//* - change - updated to version 1.3.0 for ease of field repairs
+//* - change - removed temperature correction routine from 29307.01.02.01
+//* - change - hid HV2 command since it is not currently used
+//* - change - TIME function will now display AM or PM when in 12 hour mode
+//* - change - DATE function will now display military standard date when in 24 hour mode
+//* - change - DATE data logging will now display military standard date when in 24 hour mode
+//*
+//* 29307.01.02.08  03/27/13    James Comstock
+//* - change - revamped INS:TOF so it will update the three new hot temperature corrections with the currently stored value
+//* - change - changed file logging to create a usable cfg from the instrument setup report
+//*
+//* 29307.01.02.07  03/26/13    James Comstock
+//* - change - changed temperature correction routine to include three additional hot correction values
+//*
+//* 29307.01.02.06  03/25/13    James Comstock
+//* - added - data logging will now report input voltage but this setup via cfg file only
+//* - fixed bug - integrate function with a digits value of 6 now reports 6 digits instead of 5
+//*
+//* 29307.01.02.05  03/21/13    James Comstock
+//* - change - improved the instrument response on the lower range
+//*
+//* 29307.01.02.04  03/18/13    James Comstock
+//* - change - modified background reading response times (jitter now has more power)
+//*
+//* 29307.01.02.03  02/08/13    James Comstock
+//* - change - recompiled after test firmware modifications to the common folders
+//* - change - correction factor function will now skip correction factors with a value of 0.000
+//* - change - force screen redraw when setting function header information
+//* - added - first implementation of pressure sensor including pressure function
+//*
+//* 29307.01.02.02  01/28/13    James Comstock
+//* - added - correction factor mode function
+//* - change - renamed AdjustReading() to ReadingCalculation()
+//* - change - changed how the function structures are packed to prevent errors
+//*
+//* 29307.01.02.01  12/14/12    James Comstock
+//* - added - command to force 3 degree C average to report data
+//* - change - temperature correction routine will now wait 1 hour before starting
+//*
+//* 29307.01.02.00  12/04/12    James Comstock
+//* - change - firmware checks bootloader processor speed and adjusts firmware speed accordingly
+//*
+//* 29307.01.01.25  11/30/12    James Comstock
+//* - change - converted from 80MHz to 72MHz
+//*
+//* 29307.01.01.24  11/12/12    James Comstock
+//* - added - 9DP* capability
+//* - added - 9DP-2 capability
+//* - added - command parser for comment messages either transmitted or read from configuration file
+//* - change - changed method for determining element precision
+//*
+//* 29307.01.01.23  11/08/12    James Comstock
+//* - change - changed "Integrated" to "Int." on all data reporting to reduce string size
+//* - fixed bug - fixed improper display of readings for v1, 4 digits, range 1, 2 digits of precision
+//* - fixed bug - instrument would not shut down properly when the battery was below 7.5 Vdc
+//*
+//* 29307.01.01.22  10/31/12    James Comstock
+//* - change - precision of integrate value in log report has increased to 3 digits
+//* - change - precision of reading value in log report has increased to 3 digits
+//*
+//* 29307.01.01.21  09/18/12    James Comstock
+//* - added - model number v1 for RTI
+//* - change - default splash screen will not appear if image is not loaded and model is set to v1
+//* - change - cal due date will not appear on secondary screen if the model is set to v1
+//* - change - Ludlum will not appear on secondary screen if the model is set to v1
+//* - change - Ludlum will not appear on the keyboard menu if the model is set to v1
+//* - change - added the option of a 6 digit timed dose function
+//* - change - added the option of a 6 digit integrated dose function
+//* - eliminated warning - eliminated the warnings associated with the command.c date functions
+//* - eliminated warning - eliminated the warnings associated with the command.c time functions
+//* - eliminated warning - eliminated the warnings associated with the SSD1906
+//* - removed - unused functions
+//* - removed - unused header files
+//*
+//* 29307.01.01.20  06/15/12    James Comstock
+//* - fixes for PIC32 silicon revision 6 issues
+//*     - defined fixed LCD clip regions for PutPixel
+//*     - added PMPWaitBusy() instructions between PMADDR and PMDIN commands
+//*     - disabled all interrupts during I2C routines
+//*     - disabled all interrupts during PMP routines
+//* - change - commands to enable view alerts/alarms force screen redraw (clearing alerts/alarms)
+//*
+//* 29307.01.01.19  05/24/12    James Comstock
+//* - change - changed the memory origin for kseg0_program_mem from 0x9D00FA00 to 0x9D00FE00
+//* - fixed bug - integrate feature keyboard command now initializes tick when operating mode is changed
+//*
+//* 29307.01.01.18  05/09/12    James Comstock
+//* - change - months commands will now report with formatting
+//* - change - days commands will now report with formatting
+//* - change - hours/minutes/seconds commands will now report with formatting
+//*
+//* 29307.01.01.17  04/27/12    James Comstock
+//* - change - element precision is now 2 on the lowest range for 9DP-1
+//* - change - made additional element precision changes
+//* - change - view 4 multiplier has been set to PICO which is the software zero
+//* - added - text file is now created on the thumbdrive for the responses during cfg file processing
+//*
+//* 29307.01.01.16  04/23/12    James Comstock
+//* - fixed bug - when configured for sieverts/h, 3 digits, on range 1, readings greater than 9.99 now display with precision
+//* - fixed bug - when streaming data during calibration, the peak reading is now adjusted for the appropriate units
+//*
+//* 29307.01.01.15  04/09/12    James Comstock
+//* - added - command response is now valid for Instrument - Calibration offset - DAC
+//* - added - command response is now valid for Instrument - Detector - Display - View Setup - Appearance - DST
+//* - added - command response is now valid for Instrument - Detector - Display - View Setup - Appearance - DSV
+//* - change - months commands will now report without formatting
+//* - change - days commands will now report without formatting
+//* - change - hours/minutes/seconds command will now report without formatting
+//* - change - changes to Views - Functions will force screen redraw
+//* - change - changes to Instrument - Functions will force screen redraw
+//* - change - changes to Instrument - Functions must now match function type
+//* - change - Integrate function will no longer accept TIM commands
+//* - change - Integrate and Timed Integrate functions will no longer accept MUL or UNI commands
+//* - change - Peak Rate function will no longer accept RLK commands
+//* - fixed bug - view alerts/alarms custom messages will handle NUL messages (still unimplemented)
+//* - fixed bug - instrument alerts/alarms custom messages will handle NUL messages (still unimplemented)
+//* - fixed bug - instrument alarms will now report correctly instead of reporting as an ERROR (still unimplemented)
+//* - fixed bug - HV low/high will now handle signed integer values (still unimplemented)
+//* - fixed bug - remove FTDI line/modem bytes for messages greater than 62 characters
+//* - fixed bug - corrected reset issue caused my Microchip die change and uninitialized memory bug
+//*
+//* 29307.01.01.14  03/27/12    James Comstock
+//* - fixed bug - temperature compensation routine saves to instrument calibration variables too
+//*
+//* 29307.01.01.13  03/20/12    James Comstock
+//* - renamed i2c definitions and functions to be generic in preparation of 3D
+//* - corrected EEPROM memory size for VPR commands
+//* - corrected EEPROM memory size for view function commands
+//* - detector calibration
+//*     - GET, SET, and RES commands for non-9DP calibration constants will return ERROR
+//* - element header
+//*     - STY commands will only accept NO_ELEMENT and ARC until other styles are available
+//* - element style
+//*     - TOS commands will only accept LINEAR until other types are available
+//*     - SET and RES commands for element style variables will return ERROR for 9DP
+//*     - SET and RES commands for element style variables will force screen redraw for non-9DP
+//* - added view button routine but it is hidden
+//* - added start button routine but it is hidden
+//* - added log button routine but it is hidden
+//* - fixed bug - filter value will now save properly during SET command
+//* - fixed bug - returned value for integrate alert multiplier will report correctly
+//* - fixed bug - returned value for function alert multiplier will report correctly
+//* - fixed bug - returned value for integrate alarm multiplier will report correctly
+//* - fixed bug - returned value for function alarm multiplier will report correctly
+//* - fixed bug - integrate feature multiplier will immediately change the integrated dose function multiplier
+//*
+//* 29307.01.01.12  03/09/12    James Comstock
+//* - removed hr when reporting SI units
+//* - improved command response for TOF
+//* - removed unused or replaced system commands
+//* - INS:STG:PRD:XXX:MOD will now generate a response prior to resetting if the value is changed
+//* - integrare function will use the units associated with the integrate feature if element units are invalid.
+//*     - units will no longer be required for integrate function
+//* - integrate function will use the multiplier associated with the integrate feature as the base multiplier
+//*     - multiplier will no longer be required for integrate function
+//* - timed dose function will use the units associated with the integrate feature if element units are invalid.
+//*     - units will no longer be required for timed dose function
+//* - timed dose function will use the multiplier associated with the integrate feature as the base multiplier
+//*     - multiplier will no longer be required for timed dose function
+//* - added REM to integrate function
+//*
+//* 29307.01.01.11  03/07/12    James Comstock
+//* - fixed bug - integrate alert will not report after an integrate alarm
+//* - fixed bug - integrate function will set the proper detector
+//* - fixed bug - integrate function value color will be correct if alert/alarm on power-up
+//* - normal message on error buffer will reinitialize audio
+//* - clear all errors will also clear error text flag and reinitialize audio
+//*
+//* 29307.01.01.10  02/27/12    James Comstock
+//* - fixed a few bugs related to alerts and alarms
+//*
+//* 29307.01.01.09  02/24/12    James Comstock
+//* - fixed a few bugs related to logging data to thumbdrive
+//* - cleaned up data logging to thumbdrive and FTDI
+//*
+//* 29307.01.01.08  02/24/12    James Comstock
+//* - added Integrate feature reporting to thumbdrive
+//* - fixed alerts/alarms reporting issues when enabled and no value assigned
+//* - changed "Log After Power Up Delay" to "Log On Start Up" so it fits better on the screen
+//* 
+//* 29307.01.01.07  02/20/12    James Comstock
+//* - changed detector calibration command updates to the high voltage board to reduce command response time
+//* - added correction factor to the upper range of the 9DP-1 to improve responses above 50R
+//* - changed ticks per second back to 8 as 16 did not provide a significant advantage
+//*                                                                     
+//* 29307.01.01.06  02/16/12    James Comstock
+//* - check battery every 3 seconds instead of 0.75 seconds
+//* - increased message buffer length to 250 characters
+//* - changed ticks per second to 16 for 9DP-1 testing
+//*                                                                     
+//* 29307.01.01.05  02/15/12    James Comstock
+//* - corrected bug when changing instrument type (found in v1.01.00)
+//* - corrected bug when saving integrated dose on power-up (found in v1.01.04)
+//* - commended out the following definitions and removed their associated files
+//*     - USE_GRID                                                  // Enable Grid Object.
+//*     - USE_WINDOW                                                // Enable Window Object.
+//*     - USE_CHECKBOX                                              // Enable Checkbox Object.
+//*     - USE_RADIOBUTTON                                           // Enable Radio Button Object.
+//*     - USE_EDITBOX                                               // Enable Edit Box Object.
+//*     - USE_LISTBOX                                               // Enable List Box Object.
+//*     - USE_SLIDER                                                // Enable Slider or Scroll Bar Object.
+//*     - USE_PROGRESSBAR                                           // Enable Progress Bar Object.
+//*     - USE_GROUPBOX                                              // Enable Group Box Object.
+//*     - USE_STATICTEXT                                            // Enable Static Text Object.
+//* - removed the following files from the project
+//*     - Chart.c
+//*     - Chart.h
+//*
+//* 29307.01.01.04  02/13/12    James Comstock
+//* - alerts are now burnt yellow
+//* - corrected temperature offset display so it properly displays 0.0 correction temperatures (found in v1.00.83)
+//* - fixed backlight default so it is now auto (found in v01.01.00)
+//* - corrected character array issues when array was full and displaying character array as string (found in v1.00.83)
+//* - moved screen information out of main program and into system.c
+//* - default function configuration is now on a per view basis
+//* - default element configuration is now on a per view basis
+//*
+//* 29307.01.01.03  02/02/12    James Comstock
+//* - fixed temperature offset correction function (found in v1.00.83)
+//*
+//* 29307.01.01.02  01/30/12    James Comstock
+//* - changing data reported while data logging is active automatically generates a new header
+//* - fixed integrate data reporting on power-up
+//* - fixed integrate data reporting on power-down
+//* - changed data reporting event numbers
+//* - cleared stored reading after calculating accumulated dose
+//* - removed redundant interrupt disable/enable commands
+//* - changed operation of integrate feature value/multiplier/units
+//*                                                                     
+//* 29307.01.01.01  01/18/12    James Comstock
+//* - changed defaults for views and functions to improve keyboard functionality
+//* - added - empty - to view function pointers that are not assigned
+//* - added NO FUNCTION to functions available
+//* - added function names to keyboard menu
+//* - added functions to views in keyboard menu
+//* - added view names in keyboard menu
+//* - fixed bug which would not allow power-up view to save (found in v01.01.00)
+//* - fixed integrated dose units problem (found in v01.01.00)
+//* - fixed NULL responses for numeric commands
+//* - fixed integrated dose logging (v01.00.83)
+//* - fixed improper storage of electrometer temperature issue (found in v01.00.83)
+//* - fixed keyboard issue (found in v01.00.83)
+//* - additional changes to prepare for new model numbers
+//* - redesigned data structure system
+//* - redesigned default data system
+//*
+//* 29307.01.01.00  09/xx/11    James Comstock
+//* - additional changes to prepare for new model numbers
+//* - redesigned data structure system
+//* - redesigned default data system
+//*
+//* 29307.01.00.83  08/18/11    James Comstock
+//* - changed audio response in fixed range situations
+//* - changed audio response in auto range situations
+//*
+//* 29307.01.00.82  08/16/11    James Comstock
+//* - changed the v/mR calculation values for the 9DP-1
+//* - changed the hot side temperature test to 15 degrees above room temperature
+//* - changed the electrometer offset/temperature correction value from 40.0 to 40.2
+//*
+//* 29307.01.00.81  08/15/11    James Comstock
+//* - added internally stored range icons
+//* - fixed background color issue when erasing range icon
+//*
+//* 29307.01.00.80  07/20/11    James Comstock
+//* - corrected storage of calibration technician initials
+//*
+//* 29307.01.00.79  07/20/11    James Comstock
+//* - scrolling of data via keyboard is now allowed
+//* - fixed error with default background color. other errors may still exist.
+//*
+//* 29307.01.00.78  07/11/11    James Comstock
+//* - modifications to prepare code for transfer
+//* - released before it was ready for the Model 9DP-1
+//*
+//* 29307.01.00.77  07/06/11    James Comstock
+//* - all images may be stored in the external memory
+//* - if using external images, image file will be required for icons to be displayed
+//*
+//* 29307.01.00.76  06/27/11    James Comstock
+//* - cleaned up issue with FTDI data logging
+//* - corrected issue so firmware is compatible with versions 1.0.3 and 1.0.4 of the supervisor firmware
+//* - incorporated eeprom backup routines
+//*
+//* 29307.01.00.75  06/24/11    James Comstock
+//* - disabled interrupts while the PIC32 is writing data to the PIC18 supervisor
+//* - rate updates normally if not auto-ranging and max range value is exceeded
+//* - multiplier updates normally in data streaming when placed in fixed range mode
+//* - audio alarm occurs if max range value exceeded in fixed range mode
+//*                                                                     
+//* 29307.01.00.74  06/23/11    James Comstock
+//* - disabled interrupts while the PIC32 is reading data from the PIC18 supervisor
+//*
+//* 29307.01.00.73  06/22/11    James Comstock
+//* - abandon I2C routines in which communication is lost
+//* - enabled PIC32 RTC... PIC32 now reads PIC18 RTC only on powerup and when time/date changes are requested
+//* - HV board DAC routines now write to register only and no longer update EPROM
+//* - due to changes in DAC routines, meteroffset routine should take 1/10th the previous amount of time to complete
+//* - meteroffset routine now returns calculated value added to DAC offset
+//* - HVBUpdateOffset function time reduced by 200ms
+//*
+//* 29307.01.00.72  06/15/11    James Comstock
+//* - corrected meteroffset routine so it will return values between 0 and 4095
+//*
+//* 29307.01.00.71  06/15/11    James Comstock
+//* - changed supervisor timing for RTC
+//*
+//* 29307.01.00.70  06/14/11    James Comstock
+//* - changed command message error response
+//*
+//* 29307.01.00.69  06/07/11    James Comstock
+//* - incorporated splash image conversion utility
+//* - incorporated splash image - beta stage
+//* - meter offset routine now saves to eeprom upon completion
+//* - re-enabled data streaming
+//*
+//* 29307.01.00.68  05/23/11    James Comstock
+//* - disabled data streaming for testing
+//* - incorporated splash image - alpha stage
+//*
+//* 29307.01.00.67  05/20/11    James Comstock
+//* - added error handling routines for USB thumbdrive routines
+//*
+//* 29307.01.00.66  05/19/11    James Comstock
+//* - fixed thumbdrive file systems that would not initialize on the first attempt
+//* - due to thumbdrive file system fix, cfg files will now read anytime
+//*
+//* 29307.01.00.65  05/18/11    James Comstock
+//* - disabled changing model number via keyboard
+//* - changed over_range routine for 9DP-1
+//* - replaced low_pressure_chamber variable with lmi.settings.product.info.model_number
+//* - corrected an issue with foreground/background colors when switching views
+//*
+//* 29307.01.00.64  05/17/11    James Comstock
+//* - fixed bug in DATE function
+//* - fixed bug in TIME function
+//* - fixed bug with USB icon on colored background screen
+//*
+//* 29307.01.00.63  05/11/11    James Comstock
+//* - first officially shipped version
+//*
+//* firmware        05/15/10    Clint Appling                               
+//* - Original Prototype                            

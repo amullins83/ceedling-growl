@@ -1,0 +1,153 @@
+---
+
+# Notes:
+# Sample project C code is not presently written to produce a release artifact.
+# As such, release build options are disabled.
+# This sample, therefore, only demonstrates running a collection of unit tests.
+
+:project:
+  :use_exceptions: FALSE
+  :use_test_preprocessor: TRUE
+  :use_auxiliary_dependencies: TRUE
+  :build_root: build
+  :release_build: TRUE
+  :test_file_prefix: test_
+
+:release_build:
+  :output: M9DP.elf
+  :use_assembly: FALSE
+
+:environment:
+  - :mcu: 32MX460F512L
+  - :f_cpu: 8000000UL 
+  - :serial_port: COM1  #change this to the serial port you are using!!!
+  - :objcopy: objcopy
+  - :min_heap_size: 3072
+  - :min_stack_size: 1024
+  - :lib: lib
+  - :master_include: /c/Microchip/MPLABC32/pic32mx/include
+
+:extension:
+  :executable: .elf
+
+:paths:
+  :include:
+    - include/**
+    - vendor/ceedling/vendor/unity/src/**
+    - vendor/ceedling/vendor/cmock/src/**
+  :test:
+    - +:test/**
+    - -:test/support
+  :source:
+    - source/**
+    - common/**
+  :support:
+    - test/support
+
+:files:
+  :lib:
+    - lib/**.{a,o}
+
+:defines:
+  # in order to add common defines:
+  #  1) remove the trailing [] from the :common: section
+  #  2) add entries to the :common: section (e.g. :test: has TEST defined)
+  :commmon: &common_defines []
+  :test:
+    - *common_defines
+    - TEST
+  :test_preprocess:
+    - *common_defines
+    - TEST
+
+:cmock:
+  :mock_prefix: Mock
+  :when_no_prototypes: :warn
+  :enforce_strict_ordering: TRUE
+  :plugins:
+    - :ignore
+    - :callback
+  :treat_as:
+    uint8:    HEX8
+    uint16:   HEX16
+    uint32:   UINT32
+    int8:     INT8
+    bool:     UINT8
+
+:tools:
+  :release_compiler:
+    :executable: pic32-gcc
+    :arguments:
+      - -mprocessor=#{ENV['MCU']}
+      - -g
+      - -x
+      - c
+      - -c
+      - -DTHIS_IS_MODEL_9DP
+      - -Icommon
+      - -Iinclude
+      - -Os
+      - -MMD
+      - -o ${2}
+      - ${1}
+      - -fshort-enums
+  :release_linker:
+    :executable: pic32-gcc
+    :arguments:
+      - -mprocessor=#{ENV['MCU']}
+      - -o ${2}
+      - ${1}
+      - -Wl
+      - --defsym=__MPLAB_BUILD=1
+      - --script=elf32pic32mx_MSD_Boot.ld
+      - --defsym=_min_heap_size=#{ENV['MIN_HEAP_SIZE']}
+      - --defsym=_min_stack_size=#{ENV['MIN_STACK_SIZE']}
+      - -Llib
+      - -Os
+  :test_compiler:
+    :executable: gcc
+    :arguments:
+      - -g
+      - -x c
+      - -c
+      - -D__TEST__
+      - -DTHIS_IS_MODEL_9DP
+      - -D__PIC32_FEATURE_SET__=460
+      - -D__PIC32MX__
+      - -D__32MX460F512L__=1
+      - -D__LANGUAGE_C__
+      - -Itest/support/MicrochipIncludes
+      - -Icommon
+      - -Iinclude
+      - -Ivendor/ceedling/vendor/unity/src
+      - -Ivendor/ceedling/vendor/cmock/src
+      - -Imocks
+      - -Itest/support
+      - -Os
+      - -MMD
+      - -o ${2}
+      - ${1}
+      - -fshort-enums
+  :test_linker:
+    :executable: gcc
+    :arguments:
+      - -mprocessor=#{ENV['MCU']}
+      - -o ${2}
+      - ${1}
+      - -Wl
+      - --defsym=__MPLAB_BUILD=1
+      - --script=elf32pic32mx_MSD_Boot.ld
+      - --defsym=_min_heap_size=#{ENV['MIN_HEAP_SIZE']}
+      - --defsym=_min_stack_size=#{ENV['MIN_STACK_SIZE']}
+      - -Llib
+      - -Os
+
+
+:plugins:
+  :load_paths:
+    - vendor/ceedling/plugins
+  :enabled:
+    - stdout_pretty_tests_report
+    - module_generator
+    - ceedling_growl
+...
