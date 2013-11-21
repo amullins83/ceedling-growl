@@ -21,7 +21,7 @@ typedef struct _CMOCK_newRunningAverage_CALL_INSTANCE
   int Expected_sampleRate;
   int Expected_minTime;
   int Expected_maxTime;
-  int Expected_maxCountsPerSecond;
+  int Expected_minTimeThreshold;
 
 } CMOCK_newRunningAverage_CALL_INSTANCE;
 
@@ -40,7 +40,7 @@ typedef struct _CMOCK_initRunningAverage_CALL_INSTANCE
   int Expected_sampleRate;
   int Expected_minTime;
   int Expected_maxTime;
-  int Expected_maxCountsPerSecond;
+  int Expected_minTimeThreshold;
 
 } CMOCK_initRunningAverage_CALL_INSTANCE;
 
@@ -100,37 +100,37 @@ typedef struct _CMOCK_runningAverageSetMinTime_CALL_INSTANCE
 
 } CMOCK_runningAverageSetMinTime_CALL_INSTANCE;
 
-typedef struct _CMOCK_runningAverageGetBackgroundCountsPerSecond_CALL_INSTANCE
+typedef struct _CMOCK_runningAverageGetMaxTimeThreshold_CALL_INSTANCE
 {
   UNITY_LINE_TYPE LineNumber;
   int ReturnVal;
   RunningAverage* Expected_ra;
 
-} CMOCK_runningAverageGetBackgroundCountsPerSecond_CALL_INSTANCE;
+} CMOCK_runningAverageGetMaxTimeThreshold_CALL_INSTANCE;
 
-typedef struct _CMOCK_runningAverageSetBackgroundCountsPerSecond_CALL_INSTANCE
+typedef struct _CMOCK_runningAverageSetMaxTimeThreshold_CALL_INSTANCE
 {
   UNITY_LINE_TYPE LineNumber;
   RunningAverage* Expected_ra;
   int Expected_background;
 
-} CMOCK_runningAverageSetBackgroundCountsPerSecond_CALL_INSTANCE;
+} CMOCK_runningAverageSetMaxTimeThreshold_CALL_INSTANCE;
 
-typedef struct _CMOCK_runningAverageGetMaxCountsPerSecond_CALL_INSTANCE
+typedef struct _CMOCK_runningAverageGetMinTimeThreshold_CALL_INSTANCE
 {
   UNITY_LINE_TYPE LineNumber;
   int ReturnVal;
   RunningAverage* Expected_ra;
 
-} CMOCK_runningAverageGetMaxCountsPerSecond_CALL_INSTANCE;
+} CMOCK_runningAverageGetMinTimeThreshold_CALL_INSTANCE;
 
-typedef struct _CMOCK_runningAverageSetMaxCountsPerSecond_CALL_INSTANCE
+typedef struct _CMOCK_runningAverageSetMinTimeThreshold_CALL_INSTANCE
 {
   UNITY_LINE_TYPE LineNumber;
   RunningAverage* Expected_ra;
   int Expected_max;
 
-} CMOCK_runningAverageSetMaxCountsPerSecond_CALL_INSTANCE;
+} CMOCK_runningAverageSetMinTimeThreshold_CALL_INSTANCE;
 
 typedef struct _CMOCK_runningAverageCalcNumSpeeds_CALL_INSTANCE
 {
@@ -153,10 +153,10 @@ static struct MockRunningAverageInstance
   CMOCK_MEM_INDEX_TYPE runningAverageSetSampleRate_CallInstance;
   CMOCK_MEM_INDEX_TYPE runningAverageSetMaxTime_CallInstance;
   CMOCK_MEM_INDEX_TYPE runningAverageSetMinTime_CallInstance;
-  CMOCK_MEM_INDEX_TYPE runningAverageGetBackgroundCountsPerSecond_CallInstance;
-  CMOCK_MEM_INDEX_TYPE runningAverageSetBackgroundCountsPerSecond_CallInstance;
-  CMOCK_MEM_INDEX_TYPE runningAverageGetMaxCountsPerSecond_CallInstance;
-  CMOCK_MEM_INDEX_TYPE runningAverageSetMaxCountsPerSecond_CallInstance;
+  CMOCK_MEM_INDEX_TYPE runningAverageGetMaxTimeThreshold_CallInstance;
+  CMOCK_MEM_INDEX_TYPE runningAverageSetMaxTimeThreshold_CallInstance;
+  CMOCK_MEM_INDEX_TYPE runningAverageGetMinTimeThreshold_CallInstance;
+  CMOCK_MEM_INDEX_TYPE runningAverageSetMinTimeThreshold_CallInstance;
   CMOCK_MEM_INDEX_TYPE runningAverageCalcNumSpeeds_CallInstance;
 } Mock;
 
@@ -176,10 +176,10 @@ void MockRunningAverage_Verify(void)
   UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageSetSampleRate_CallInstance, cmock_line, "Function 'runningAverageSetSampleRate' called less times than expected.");
   UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageSetMaxTime_CallInstance, cmock_line, "Function 'runningAverageSetMaxTime' called less times than expected.");
   UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageSetMinTime_CallInstance, cmock_line, "Function 'runningAverageSetMinTime' called less times than expected.");
-  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageGetBackgroundCountsPerSecond_CallInstance, cmock_line, "Function 'runningAverageGetBackgroundCountsPerSecond' called less times than expected.");
-  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageSetBackgroundCountsPerSecond_CallInstance, cmock_line, "Function 'runningAverageSetBackgroundCountsPerSecond' called less times than expected.");
-  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageGetMaxCountsPerSecond_CallInstance, cmock_line, "Function 'runningAverageGetMaxCountsPerSecond' called less times than expected.");
-  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageSetMaxCountsPerSecond_CallInstance, cmock_line, "Function 'runningAverageSetMaxCountsPerSecond' called less times than expected.");
+  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageGetMaxTimeThreshold_CallInstance, cmock_line, "Function 'runningAverageGetMaxTimeThreshold' called less times than expected.");
+  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageSetMaxTimeThreshold_CallInstance, cmock_line, "Function 'runningAverageSetMaxTimeThreshold' called less times than expected.");
+  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageGetMinTimeThreshold_CallInstance, cmock_line, "Function 'runningAverageGetMinTimeThreshold' called less times than expected.");
+  UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageSetMinTimeThreshold_CallInstance, cmock_line, "Function 'runningAverageSetMinTimeThreshold' called less times than expected.");
   UNITY_TEST_ASSERT(CMOCK_GUTS_NONE == Mock.runningAverageCalcNumSpeeds_CallInstance, cmock_line, "Function 'runningAverageCalcNumSpeeds' called less times than expected.");
 }
 
@@ -214,7 +214,7 @@ void newDefaultRunningAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, R
   cmock_call_instance->ReturnVal = cmock_to_return;
 }
 
-RunningAverage* newRunningAverage(float initialAverage, int sampleRate, int minTime, int maxTime, int maxCountsPerSecond)
+RunningAverage* newRunningAverage(float initialAverage, int sampleRate, int minTime, int maxTime, int minTimeThreshold)
 {
   UNITY_LINE_TYPE cmock_line = TEST_LINE_NUM;
   CMOCK_newRunningAverage_CALL_INSTANCE* cmock_call_instance = (CMOCK_newRunningAverage_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.newRunningAverage_CallInstance);
@@ -234,28 +234,28 @@ RunningAverage* newRunningAverage(float initialAverage, int sampleRate, int minT
     UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_maxTime, maxTime, cmock_line, "Function 'newRunningAverage' called with unexpected value for argument 'maxTime'.");
   }
   {
-    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_maxCountsPerSecond, maxCountsPerSecond, cmock_line, "Function 'newRunningAverage' called with unexpected value for argument 'maxCountsPerSecond'.");
+    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_minTimeThreshold, minTimeThreshold, cmock_line, "Function 'newRunningAverage' called with unexpected value for argument 'minTimeThreshold'.");
   }
   return cmock_call_instance->ReturnVal;
 }
 
-void CMockExpectParameters_newRunningAverage(CMOCK_newRunningAverage_CALL_INSTANCE* cmock_call_instance, float initialAverage, int sampleRate, int minTime, int maxTime, int maxCountsPerSecond)
+void CMockExpectParameters_newRunningAverage(CMOCK_newRunningAverage_CALL_INSTANCE* cmock_call_instance, float initialAverage, int sampleRate, int minTime, int maxTime, int minTimeThreshold)
 {
   cmock_call_instance->Expected_initialAverage = initialAverage;
   cmock_call_instance->Expected_sampleRate = sampleRate;
   cmock_call_instance->Expected_minTime = minTime;
   cmock_call_instance->Expected_maxTime = maxTime;
-  cmock_call_instance->Expected_maxCountsPerSecond = maxCountsPerSecond;
+  cmock_call_instance->Expected_minTimeThreshold = minTimeThreshold;
 }
 
-void newRunningAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, float initialAverage, int sampleRate, int minTime, int maxTime, int maxCountsPerSecond, RunningAverage* cmock_to_return)
+void newRunningAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, float initialAverage, int sampleRate, int minTime, int maxTime, int minTimeThreshold, RunningAverage* cmock_to_return)
 {
   CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_newRunningAverage_CALL_INSTANCE));
   CMOCK_newRunningAverage_CALL_INSTANCE* cmock_call_instance = (CMOCK_newRunningAverage_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
   UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "CMock has run out of memory. Please allocate more.");
   Mock.newRunningAverage_CallInstance = CMock_Guts_MemChain(Mock.newRunningAverage_CallInstance, cmock_guts_index);
   cmock_call_instance->LineNumber = cmock_line;
-  CMockExpectParameters_newRunningAverage(cmock_call_instance, initialAverage, sampleRate, minTime, maxTime, maxCountsPerSecond);
+  CMockExpectParameters_newRunningAverage(cmock_call_instance, initialAverage, sampleRate, minTime, maxTime, minTimeThreshold);
   cmock_call_instance->ReturnVal = cmock_to_return;
 }
 
@@ -286,7 +286,7 @@ void initDefaultRunningAverage_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAv
   CMockExpectParameters_initDefaultRunningAverage(cmock_call_instance, ra);
 }
 
-void initRunningAverage(RunningAverage* ra, float initialAverage, int sampleRate, int minTime, int maxTime, int maxCountsPerSecond)
+void initRunningAverage(RunningAverage* ra, float initialAverage, int sampleRate, int minTime, int maxTime, int minTimeThreshold)
 {
   UNITY_LINE_TYPE cmock_line = TEST_LINE_NUM;
   CMOCK_initRunningAverage_CALL_INSTANCE* cmock_call_instance = (CMOCK_initRunningAverage_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.initRunningAverage_CallInstance);
@@ -309,28 +309,28 @@ void initRunningAverage(RunningAverage* ra, float initialAverage, int sampleRate
     UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_maxTime, maxTime, cmock_line, "Function 'initRunningAverage' called with unexpected value for argument 'maxTime'.");
   }
   {
-    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_maxCountsPerSecond, maxCountsPerSecond, cmock_line, "Function 'initRunningAverage' called with unexpected value for argument 'maxCountsPerSecond'.");
+    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_minTimeThreshold, minTimeThreshold, cmock_line, "Function 'initRunningAverage' called with unexpected value for argument 'minTimeThreshold'.");
   }
 }
 
-void CMockExpectParameters_initRunningAverage(CMOCK_initRunningAverage_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra, float initialAverage, int sampleRate, int minTime, int maxTime, int maxCountsPerSecond)
+void CMockExpectParameters_initRunningAverage(CMOCK_initRunningAverage_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra, float initialAverage, int sampleRate, int minTime, int maxTime, int minTimeThreshold)
 {
   cmock_call_instance->Expected_ra = ra;
   cmock_call_instance->Expected_initialAverage = initialAverage;
   cmock_call_instance->Expected_sampleRate = sampleRate;
   cmock_call_instance->Expected_minTime = minTime;
   cmock_call_instance->Expected_maxTime = maxTime;
-  cmock_call_instance->Expected_maxCountsPerSecond = maxCountsPerSecond;
+  cmock_call_instance->Expected_minTimeThreshold = minTimeThreshold;
 }
 
-void initRunningAverage_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, float initialAverage, int sampleRate, int minTime, int maxTime, int maxCountsPerSecond)
+void initRunningAverage_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, float initialAverage, int sampleRate, int minTime, int maxTime, int minTimeThreshold)
 {
   CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_initRunningAverage_CALL_INSTANCE));
   CMOCK_initRunningAverage_CALL_INSTANCE* cmock_call_instance = (CMOCK_initRunningAverage_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
   UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "CMock has run out of memory. Please allocate more.");
   Mock.initRunningAverage_CallInstance = CMock_Guts_MemChain(Mock.initRunningAverage_CallInstance, cmock_guts_index);
   cmock_call_instance->LineNumber = cmock_line;
-  CMockExpectParameters_initRunningAverage(cmock_call_instance, ra, initialAverage, sampleRate, minTime, maxTime, maxCountsPerSecond);
+  CMockExpectParameters_initRunningAverage(cmock_call_instance, ra, initialAverage, sampleRate, minTime, maxTime, minTimeThreshold);
 }
 
 int runningAverageGetNewSample(RunningAverage* ra)
@@ -544,124 +544,124 @@ void runningAverageSetMinTime_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAve
   CMockExpectParameters_runningAverageSetMinTime(cmock_call_instance, ra, min);
 }
 
-int runningAverageGetBackgroundCountsPerSecond(RunningAverage* ra)
+int runningAverageGetMaxTimeThreshold(RunningAverage* ra)
 {
   UNITY_LINE_TYPE cmock_line = TEST_LINE_NUM;
-  CMOCK_runningAverageGetBackgroundCountsPerSecond_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageGetBackgroundCountsPerSecond_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.runningAverageGetBackgroundCountsPerSecond_CallInstance);
-  Mock.runningAverageGetBackgroundCountsPerSecond_CallInstance = CMock_Guts_MemNext(Mock.runningAverageGetBackgroundCountsPerSecond_CallInstance);
-  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "Function 'runningAverageGetBackgroundCountsPerSecond' called more times than expected.");
+  CMOCK_runningAverageGetMaxTimeThreshold_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageGetMaxTimeThreshold_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.runningAverageGetMaxTimeThreshold_CallInstance);
+  Mock.runningAverageGetMaxTimeThreshold_CallInstance = CMock_Guts_MemNext(Mock.runningAverageGetMaxTimeThreshold_CallInstance);
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "Function 'runningAverageGetMaxTimeThreshold' called more times than expected.");
   cmock_line = cmock_call_instance->LineNumber;
   {
-    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(cmock_call_instance->Expected_ra), (void*)(ra), sizeof(RunningAverage), cmock_line, "Function 'runningAverageGetBackgroundCountsPerSecond' called with unexpected value for argument 'ra'.");
+    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(cmock_call_instance->Expected_ra), (void*)(ra), sizeof(RunningAverage), cmock_line, "Function 'runningAverageGetMaxTimeThreshold' called with unexpected value for argument 'ra'.");
   }
   return cmock_call_instance->ReturnVal;
 }
 
-void CMockExpectParameters_runningAverageGetBackgroundCountsPerSecond(CMOCK_runningAverageGetBackgroundCountsPerSecond_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra)
+void CMockExpectParameters_runningAverageGetMaxTimeThreshold(CMOCK_runningAverageGetMaxTimeThreshold_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra)
 {
   cmock_call_instance->Expected_ra = ra;
 }
 
-void runningAverageGetBackgroundCountsPerSecond_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return)
+void runningAverageGetMaxTimeThreshold_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return)
 {
-  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_runningAverageGetBackgroundCountsPerSecond_CALL_INSTANCE));
-  CMOCK_runningAverageGetBackgroundCountsPerSecond_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageGetBackgroundCountsPerSecond_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
+  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_runningAverageGetMaxTimeThreshold_CALL_INSTANCE));
+  CMOCK_runningAverageGetMaxTimeThreshold_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageGetMaxTimeThreshold_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
   UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "CMock has run out of memory. Please allocate more.");
-  Mock.runningAverageGetBackgroundCountsPerSecond_CallInstance = CMock_Guts_MemChain(Mock.runningAverageGetBackgroundCountsPerSecond_CallInstance, cmock_guts_index);
+  Mock.runningAverageGetMaxTimeThreshold_CallInstance = CMock_Guts_MemChain(Mock.runningAverageGetMaxTimeThreshold_CallInstance, cmock_guts_index);
   cmock_call_instance->LineNumber = cmock_line;
-  CMockExpectParameters_runningAverageGetBackgroundCountsPerSecond(cmock_call_instance, ra);
+  CMockExpectParameters_runningAverageGetMaxTimeThreshold(cmock_call_instance, ra);
   cmock_call_instance->ReturnVal = cmock_to_return;
 }
 
-void runningAverageSetBackgroundCountsPerSecond(RunningAverage* ra, int background)
+void runningAverageSetMaxTimeThreshold(RunningAverage* ra, int background)
 {
   UNITY_LINE_TYPE cmock_line = TEST_LINE_NUM;
-  CMOCK_runningAverageSetBackgroundCountsPerSecond_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageSetBackgroundCountsPerSecond_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.runningAverageSetBackgroundCountsPerSecond_CallInstance);
-  Mock.runningAverageSetBackgroundCountsPerSecond_CallInstance = CMock_Guts_MemNext(Mock.runningAverageSetBackgroundCountsPerSecond_CallInstance);
-  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "Function 'runningAverageSetBackgroundCountsPerSecond' called more times than expected.");
+  CMOCK_runningAverageSetMaxTimeThreshold_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageSetMaxTimeThreshold_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.runningAverageSetMaxTimeThreshold_CallInstance);
+  Mock.runningAverageSetMaxTimeThreshold_CallInstance = CMock_Guts_MemNext(Mock.runningAverageSetMaxTimeThreshold_CallInstance);
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "Function 'runningAverageSetMaxTimeThreshold' called more times than expected.");
   cmock_line = cmock_call_instance->LineNumber;
   {
-    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(cmock_call_instance->Expected_ra), (void*)(ra), sizeof(RunningAverage), cmock_line, "Function 'runningAverageSetBackgroundCountsPerSecond' called with unexpected value for argument 'ra'.");
+    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(cmock_call_instance->Expected_ra), (void*)(ra), sizeof(RunningAverage), cmock_line, "Function 'runningAverageSetMaxTimeThreshold' called with unexpected value for argument 'ra'.");
   }
   {
-    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_background, background, cmock_line, "Function 'runningAverageSetBackgroundCountsPerSecond' called with unexpected value for argument 'background'.");
+    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_background, background, cmock_line, "Function 'runningAverageSetMaxTimeThreshold' called with unexpected value for argument 'background'.");
   }
 }
 
-void CMockExpectParameters_runningAverageSetBackgroundCountsPerSecond(CMOCK_runningAverageSetBackgroundCountsPerSecond_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra, int background)
+void CMockExpectParameters_runningAverageSetMaxTimeThreshold(CMOCK_runningAverageSetMaxTimeThreshold_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra, int background)
 {
   cmock_call_instance->Expected_ra = ra;
   cmock_call_instance->Expected_background = background;
 }
 
-void runningAverageSetBackgroundCountsPerSecond_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int background)
+void runningAverageSetMaxTimeThreshold_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int background)
 {
-  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_runningAverageSetBackgroundCountsPerSecond_CALL_INSTANCE));
-  CMOCK_runningAverageSetBackgroundCountsPerSecond_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageSetBackgroundCountsPerSecond_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
+  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_runningAverageSetMaxTimeThreshold_CALL_INSTANCE));
+  CMOCK_runningAverageSetMaxTimeThreshold_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageSetMaxTimeThreshold_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
   UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "CMock has run out of memory. Please allocate more.");
-  Mock.runningAverageSetBackgroundCountsPerSecond_CallInstance = CMock_Guts_MemChain(Mock.runningAverageSetBackgroundCountsPerSecond_CallInstance, cmock_guts_index);
+  Mock.runningAverageSetMaxTimeThreshold_CallInstance = CMock_Guts_MemChain(Mock.runningAverageSetMaxTimeThreshold_CallInstance, cmock_guts_index);
   cmock_call_instance->LineNumber = cmock_line;
-  CMockExpectParameters_runningAverageSetBackgroundCountsPerSecond(cmock_call_instance, ra, background);
+  CMockExpectParameters_runningAverageSetMaxTimeThreshold(cmock_call_instance, ra, background);
 }
 
-int runningAverageGetMaxCountsPerSecond(RunningAverage* ra)
+int runningAverageGetMinTimeThreshold(RunningAverage* ra)
 {
   UNITY_LINE_TYPE cmock_line = TEST_LINE_NUM;
-  CMOCK_runningAverageGetMaxCountsPerSecond_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageGetMaxCountsPerSecond_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.runningAverageGetMaxCountsPerSecond_CallInstance);
-  Mock.runningAverageGetMaxCountsPerSecond_CallInstance = CMock_Guts_MemNext(Mock.runningAverageGetMaxCountsPerSecond_CallInstance);
-  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "Function 'runningAverageGetMaxCountsPerSecond' called more times than expected.");
+  CMOCK_runningAverageGetMinTimeThreshold_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageGetMinTimeThreshold_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.runningAverageGetMinTimeThreshold_CallInstance);
+  Mock.runningAverageGetMinTimeThreshold_CallInstance = CMock_Guts_MemNext(Mock.runningAverageGetMinTimeThreshold_CallInstance);
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "Function 'runningAverageGetMinTimeThreshold' called more times than expected.");
   cmock_line = cmock_call_instance->LineNumber;
   {
-    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(cmock_call_instance->Expected_ra), (void*)(ra), sizeof(RunningAverage), cmock_line, "Function 'runningAverageGetMaxCountsPerSecond' called with unexpected value for argument 'ra'.");
+    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(cmock_call_instance->Expected_ra), (void*)(ra), sizeof(RunningAverage), cmock_line, "Function 'runningAverageGetMinTimeThreshold' called with unexpected value for argument 'ra'.");
   }
   return cmock_call_instance->ReturnVal;
 }
 
-void CMockExpectParameters_runningAverageGetMaxCountsPerSecond(CMOCK_runningAverageGetMaxCountsPerSecond_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra)
+void CMockExpectParameters_runningAverageGetMinTimeThreshold(CMOCK_runningAverageGetMinTimeThreshold_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra)
 {
   cmock_call_instance->Expected_ra = ra;
 }
 
-void runningAverageGetMaxCountsPerSecond_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return)
+void runningAverageGetMinTimeThreshold_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return)
 {
-  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_runningAverageGetMaxCountsPerSecond_CALL_INSTANCE));
-  CMOCK_runningAverageGetMaxCountsPerSecond_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageGetMaxCountsPerSecond_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
+  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_runningAverageGetMinTimeThreshold_CALL_INSTANCE));
+  CMOCK_runningAverageGetMinTimeThreshold_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageGetMinTimeThreshold_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
   UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "CMock has run out of memory. Please allocate more.");
-  Mock.runningAverageGetMaxCountsPerSecond_CallInstance = CMock_Guts_MemChain(Mock.runningAverageGetMaxCountsPerSecond_CallInstance, cmock_guts_index);
+  Mock.runningAverageGetMinTimeThreshold_CallInstance = CMock_Guts_MemChain(Mock.runningAverageGetMinTimeThreshold_CallInstance, cmock_guts_index);
   cmock_call_instance->LineNumber = cmock_line;
-  CMockExpectParameters_runningAverageGetMaxCountsPerSecond(cmock_call_instance, ra);
+  CMockExpectParameters_runningAverageGetMinTimeThreshold(cmock_call_instance, ra);
   cmock_call_instance->ReturnVal = cmock_to_return;
 }
 
-void runningAverageSetMaxCountsPerSecond(RunningAverage* ra, int max)
+void runningAverageSetMinTimeThreshold(RunningAverage* ra, int max)
 {
   UNITY_LINE_TYPE cmock_line = TEST_LINE_NUM;
-  CMOCK_runningAverageSetMaxCountsPerSecond_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageSetMaxCountsPerSecond_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.runningAverageSetMaxCountsPerSecond_CallInstance);
-  Mock.runningAverageSetMaxCountsPerSecond_CallInstance = CMock_Guts_MemNext(Mock.runningAverageSetMaxCountsPerSecond_CallInstance);
-  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "Function 'runningAverageSetMaxCountsPerSecond' called more times than expected.");
+  CMOCK_runningAverageSetMinTimeThreshold_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageSetMinTimeThreshold_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.runningAverageSetMinTimeThreshold_CallInstance);
+  Mock.runningAverageSetMinTimeThreshold_CallInstance = CMock_Guts_MemNext(Mock.runningAverageSetMinTimeThreshold_CallInstance);
+  UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "Function 'runningAverageSetMinTimeThreshold' called more times than expected.");
   cmock_line = cmock_call_instance->LineNumber;
   {
-    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(cmock_call_instance->Expected_ra), (void*)(ra), sizeof(RunningAverage), cmock_line, "Function 'runningAverageSetMaxCountsPerSecond' called with unexpected value for argument 'ra'.");
+    UNITY_TEST_ASSERT_EQUAL_MEMORY((void*)(cmock_call_instance->Expected_ra), (void*)(ra), sizeof(RunningAverage), cmock_line, "Function 'runningAverageSetMinTimeThreshold' called with unexpected value for argument 'ra'.");
   }
   {
-    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_max, max, cmock_line, "Function 'runningAverageSetMaxCountsPerSecond' called with unexpected value for argument 'max'.");
+    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_max, max, cmock_line, "Function 'runningAverageSetMinTimeThreshold' called with unexpected value for argument 'max'.");
   }
 }
 
-void CMockExpectParameters_runningAverageSetMaxCountsPerSecond(CMOCK_runningAverageSetMaxCountsPerSecond_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra, int max)
+void CMockExpectParameters_runningAverageSetMinTimeThreshold(CMOCK_runningAverageSetMinTimeThreshold_CALL_INSTANCE* cmock_call_instance, RunningAverage* ra, int max)
 {
   cmock_call_instance->Expected_ra = ra;
   cmock_call_instance->Expected_max = max;
 }
 
-void runningAverageSetMaxCountsPerSecond_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int max)
+void runningAverageSetMinTimeThreshold_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int max)
 {
-  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_runningAverageSetMaxCountsPerSecond_CALL_INSTANCE));
-  CMOCK_runningAverageSetMaxCountsPerSecond_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageSetMaxCountsPerSecond_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
+  CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_runningAverageSetMinTimeThreshold_CALL_INSTANCE));
+  CMOCK_runningAverageSetMinTimeThreshold_CALL_INSTANCE* cmock_call_instance = (CMOCK_runningAverageSetMinTimeThreshold_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
   UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "CMock has run out of memory. Please allocate more.");
-  Mock.runningAverageSetMaxCountsPerSecond_CallInstance = CMock_Guts_MemChain(Mock.runningAverageSetMaxCountsPerSecond_CallInstance, cmock_guts_index);
+  Mock.runningAverageSetMinTimeThreshold_CallInstance = CMock_Guts_MemChain(Mock.runningAverageSetMinTimeThreshold_CallInstance, cmock_guts_index);
   cmock_call_instance->LineNumber = cmock_line;
-  CMockExpectParameters_runningAverageSetMaxCountsPerSecond(cmock_call_instance, ra, max);
+  CMockExpectParameters_runningAverageSetMinTimeThreshold(cmock_call_instance, ra, max);
 }
 
 int runningAverageCalcNumSpeeds(RunningAverage* ra)

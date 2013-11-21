@@ -1,66 +1,70 @@
 #include "unity.h"
 #include "RunningAverage.h"
+#include "time_constants.h"
 #include "NewSampleWeightCalculator.h"
 #include "newSampleWeightTests.h"
+#include "verbose_assert_float.h"
+#include "type_instrument.h"
+#include "instrument_constants.h"
+#include "model_constants.h"
+#include "models.h"
 #include <stdlib.h>
 
 
 RunningAverage *ra;
 
+TYPE_INSTRUMENT lmi;
+InstrumentConstants *ic;
+
 void setUp(void)
 {
-    ra = (RunningAverage *)malloc(sizeof(RunningAverage));
+    ra = newDefaultRunningAverage();
 }
 
 void tearDown(void)
 {
-    if(ra) free(ra);
+    free(ra);
 }
 
 /* newDefault */
 void test_newDefault_returns_pointer(void)
 {
-    tearDown();
-    ra = newDefaultRunningAverage();
-    TEST_ASSERT_NOT_NULL(ra);
+    RunningAverage *newRa = newDefaultRunningAverage();
+    TEST_ASSERT_NOT_NULL(newRa);
+    free(newRa);
 }
 
 void test_newDefault_initialization(void)
 {
-    RunningAverage *newRA = (RunningAverage *)malloc(sizeof(RunningAverage));
-    initDefaultRunningAverage(newRA);
+    RunningAverage *newRa = (RunningAverage *)malloc(sizeof(RunningAverage));
+    initDefaultRunningAverage(newRa);
 
-    TEST_ASSERT_EQUAL(newRA->average, ra->average);
-    TEST_ASSERT_EQUAL(newRA->sampleRate, ra->sampleRate);
-    TEST_ASSERT_EQUAL(newRA->minTime, ra->minTime);
-    TEST_ASSERT_EQUAL(newRA->maxTime, ra->maxTime);
-    TEST_ASSERT_EQUAL(newRA->maxCountsPerSecond, ra->maxCountsPerSecond);
+    TEST_ASSERT_EQUAL(newRa->average, ra->average);
+    TEST_ASSERT_EQUAL_MEMORY(&newRa->tc, &ra->tc, sizeof(TimeConstants));
 }
 
 /* initDefault */
 void test_initDefault_initialize(void)
 {
+    TimeConstants *tc_array = getDefaultTimeConstants();
     initDefaultRunningAverage(ra);
 
     TEST_ASSERT_EQUAL(1.0, ra->average);
-    TEST_ASSERT_EQUAL(200, ra->maxCountsPerSecond);
-    TEST_ASSERT_EQUAL(8, ra->sampleRate);
-    TEST_ASSERT_EQUAL(0, ra->minTime);
-    TEST_ASSERT_EQUAL(5, ra->maxTime);
+    TEST_ASSERT_EQUAL_MEMORY(&tc_array[0], &ra->tc, sizeof(TimeConstants));
 }
 
 /* new */
 void test_new_returns_pointer(void)
 {
     float testAverage = 0.0;
-    int   testSampleRate = 16;
-    int   testMinTime = 1;
-    int   testMaxTime = 6;
-    int   testMaxCountsPerSecond = 100;
+    TimeConstants testTc;
+    testTc.sampleRate = 16;
+    testTc.minTime = 1;
+    testTc.maxTime = 6;
+    testTc.minTimeThreshold = 100;
+    testTc.maxTimeThreshold = 10;
 
-    tearDown();
-
-    ra = newRunningAverage(testAverage, testSampleRate, testMinTime, testMaxTime, testMaxCountsPerSecond);
+    RunningAverage *newRa = newRunningAverage(testAverage, testTc);
     
     TEST_ASSERT_NOT_NULL(ra);
 }
@@ -68,36 +72,33 @@ void test_new_returns_pointer(void)
 void test_new_initialization(void)
 {
     float testAverage = 0.0;
-    int   testSampleRate = 16;
-    int   testMinTime = 1;
-    int   testMaxTime = 6;
-    int   testMaxCountsPerSecond = 100;
+    TimeConstants testTc;
+    testTc.sampleRate = 16;
+    testTc.minTime = 1;
+    testTc.maxTime = 6;
+    testTc.minTimeThreshold = 100;
+    testTc.maxTimeThreshold = 10;
 
-    tearDown();
-
-    ra = newRunningAverage(testAverage, testSampleRate, testMinTime, testMaxTime, testMaxCountsPerSecond);
+    ra = newRunningAverage(testAverage, testTc);
     
     TEST_ASSERT_EQUAL(testAverage, ra->average);
-    TEST_ASSERT_EQUAL(testSampleRate, ra->sampleRate);
-    TEST_ASSERT_EQUAL(testMinTime, ra->minTime);
-    TEST_ASSERT_EQUAL(testMaxTime, ra->maxTime);
-    TEST_ASSERT_EQUAL(testMaxCountsPerSecond, ra->maxCountsPerSecond);
+    TEST_ASSERT_EQUAL_MEMORY(&testTc, &ra->tc, sizeof(TimeConstants));
 }
 
 /* init */
 void test_init_sets_parameters(void)
 {
     float testAverage = 0.0;
-    int   testSampleRate = 16;
-    int   testMinTime = 1;
-    int   testMaxTime = 6;
-    int   testMaxCountsPerSecond = 100;
-    initRunningAverage(ra, testAverage, testSampleRate, testMinTime, testMaxTime, testMaxCountsPerSecond);
+    TimeConstants testTc;
+    testTc.sampleRate = 16;
+    testTc.minTime = 1;
+    testTc.maxTime = 6;
+    testTc.minTimeThreshold = 100;
+    testTc.maxTimeThreshold = 10;
+
+    initRunningAverage(ra, testAverage, testTc);
     TEST_ASSERT_EQUAL(testAverage, ra->average);
-    TEST_ASSERT_EQUAL(testSampleRate, ra->sampleRate);
-    TEST_ASSERT_EQUAL(testMinTime, ra->minTime);
-    TEST_ASSERT_EQUAL(testMaxTime, ra->maxTime);
-    TEST_ASSERT_EQUAL(testMaxCountsPerSecond, ra->maxCountsPerSecond);
+    TEST_ASSERT_EQUAL_MEMORY(&testTc, &ra->tc, sizeof(TimeConstants));
 }
 
 // int   runningAverageGetNewSample(RunningAverage *ra);
@@ -138,7 +139,7 @@ void test_get_average(void)
 void test_calcNewSampleWeight_defaults(void)
 {
     float testAverage[] = {1.0, 5.0, 50.0, 400.0, 0.0};
-    float correctNewSampleWeight[] = {1.0, 1.0, 10.0, 39.0, 0.0};
+    float correctNewSampleWeight[] = {1.0, 1.0, 9.125, 66.0, 0.0};
 
     initDefaultRunningAverage(ra);
 
@@ -154,7 +155,7 @@ void test_calcNewSampleWeight_with_minTime(void)
 
     runningAverageSetMinTime(ra, 1);
     runningAverageSetMaxTime(ra, 10);
-    runningAverageSetMaxCountsPerSecond(ra, 150);
+    runningAverageSetMinTimeThreshold(ra, 150);
 
     calcNewSampleWeightTest(ra, testAverage, correctNewSampleWeight);
 }
@@ -166,9 +167,9 @@ void test_calcNewSampleWeight_with_background(void)
 
     initDefaultRunningAverage(ra);
 
-    runningAverageSetBackgroundCountsPerSecond(ra, 5);
+    runningAverageSetMaxTimeThreshold(ra, 5);
     runningAverageSetMaxTime(ra, 10);
-    runningAverageSetMaxCountsPerSecond(ra, 150);
+    runningAverageSetMinTimeThreshold(ra, 150);
 
     calcNewSampleWeightTest(ra, testAverage, correctNewSampleWeight);
 }
@@ -180,7 +181,7 @@ void test_set_sampleRate(void)
     int testSampleRate = 24;
 
     runningAverageSetSampleRate(ra, testSampleRate);
-    TEST_ASSERT_EQUAL(testSampleRate, ra->sampleRate);
+    TEST_ASSERT_EQUAL(testSampleRate, ra->tc.sampleRate);
 }
 
 // void  runningAverageSetMaxTime(RunningAverage *ra, int max);
@@ -189,7 +190,7 @@ void test_setMaxTime(void)
     int testMaxTime = 10;
 
     runningAverageSetMaxTime(ra, testMaxTime);
-    TEST_ASSERT_EQUAL(testMaxTime, ra->maxTime);
+    TEST_ASSERT_EQUAL(testMaxTime, ra->tc.maxTime);
 }
 
 // void  runningAverageSetMinTime(RunningAverage *ra, int min);
@@ -198,16 +199,16 @@ void test_setMinTime(void)
     int testMinTime = 2;
 
     runningAverageSetMinTime(ra, testMinTime);
-    TEST_ASSERT_EQUAL(testMinTime, ra->minTime);
+    TEST_ASSERT_EQUAL(testMinTime, ra->tc.minTime);
 }
 
-// void  runningAverageSetMaxCountsPerSecond(RunningAverage *ra, int max);
-void test_setMaxCountsPerSecond(void)
+// void  runningAverageSetMinTimeThreshold(RunningAverage *ra, int max);
+void test_setMinTimeThreshold(void)
 {
     int testMaxCounts = 300;
 
-    runningAverageSetMaxCountsPerSecond(ra, testMaxCounts);
-    TEST_ASSERT_EQUAL(testMaxCounts, ra->maxCountsPerSecond);
+    runningAverageSetMinTimeThreshold(ra, testMaxCounts);
+    TEST_ASSERT_EQUAL(testMaxCounts, ra->tc.minTimeThreshold);
 }
 
 // void  runningAverageCalcNumSpeeds(RunningAverage *ra);
@@ -216,30 +217,33 @@ void test_calcNumSpeeds(void)
     float testMaxTime = 1.25;
     int testSampleRate = 8;
     int correctNumSpeeds = (int)(testMaxTime*testSampleRate);
+    TimeConstants *testTc = getDefaultTimeConstants();
+    testTc[0].maxTime = testMaxTime;
+    testTc[0].sampleRate = testSampleRate;
 
-    initRunningAverage(ra, 1.0, testSampleRate, 0.0, testMaxTime, 200);
+    initRunningAverage(ra, 1.0, testTc[0]);
 
     TEST_ASSERT_EQUAL(correctNumSpeeds, runningAverageCalcNumSpeeds(ra));
 }
 
-// int   runningAverageGetBackgroundCountsPerSecond(RunningAverage *ra);
+// int   runningAverageGetMaxTimeThreshold(RunningAverage *ra);
 void test_get_background(void)
 {
-    int testBackground = 4;
+    int testThreshold = 4;
 
-    ra->backgroundCountsPerSecond = testBackground;
+    ra->tc.maxTimeThreshold = testThreshold;
 
-    TEST_ASSERT_EQUAL(testBackground, runningAverageGetBackgroundCountsPerSecond(ra));
+    TEST_ASSERT_EQUAL(testThreshold, runningAverageGetMaxTimeThreshold(ra));
 }
 
-// void  runningAverageSetBackgroundCountsPerSecond(RunningAverage *ra, int background);
+// void  runningAverageSetMaxTimeThreshold(RunningAverage *ra, int background);
 void test_set_background(void)
 {
-    int testBackground = 5;
+    int testThreshold = 5;
 
     initDefaultRunningAverage(ra);
 
-    runningAverageSetBackgroundCountsPerSecond(ra, testBackground);
+    runningAverageSetMaxTimeThreshold(ra, testThreshold);
 
-    TEST_ASSERT_EQUAL(testBackground, ra->backgroundCountsPerSecond);
+    TEST_ASSERT_EQUAL(testThreshold, ra->tc.maxTimeThreshold);
 }

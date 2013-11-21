@@ -465,6 +465,7 @@ FSFILE * BMPFile                                = NULL;
 //* Special Instrument Properties
 
 InstrumentConstants *ic;
+RunningAverage *GlobalReadingAverage;
 
 //*
 //**************************************************************************************************

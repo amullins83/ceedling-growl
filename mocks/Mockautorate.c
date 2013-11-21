@@ -12,7 +12,7 @@ typedef struct _CMOCK_newAutoRateAverage_CALL_INSTANCE
   AutoRateAverage* ReturnVal;
   float Expected_initialAverage;
   int Expected_sampleRate;
-  int Expected_maxCountsPerSecond;
+  int Expected_minTimeThreshold;
   BOOL Expected_autoRate;
   AutoRateSetting Expected_autoRateSetting;
   int Expected_fixedRate;
@@ -154,7 +154,7 @@ void Mockautorate_Destroy(void)
   memset(&Mock, 0, sizeof(Mock));
 }
 
-AutoRateAverage* newAutoRateAverage(float initialAverage, int sampleRate, int maxCountsPerSecond, BOOL autoRate, AutoRateSetting autoRateSetting, int fixedRate)
+AutoRateAverage* newAutoRateAverage(float initialAverage, int sampleRate, int minTimeThreshold, BOOL autoRate, AutoRateSetting autoRateSetting, int fixedRate)
 {
   UNITY_LINE_TYPE cmock_line = TEST_LINE_NUM;
   CMOCK_newAutoRateAverage_CALL_INSTANCE* cmock_call_instance = (CMOCK_newAutoRateAverage_CALL_INSTANCE*)CMock_Guts_GetAddressFor(Mock.newAutoRateAverage_CallInstance);
@@ -168,7 +168,7 @@ AutoRateAverage* newAutoRateAverage(float initialAverage, int sampleRate, int ma
     UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_sampleRate, sampleRate, cmock_line, "Function 'newAutoRateAverage' called with unexpected value for argument 'sampleRate'.");
   }
   {
-    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_maxCountsPerSecond, maxCountsPerSecond, cmock_line, "Function 'newAutoRateAverage' called with unexpected value for argument 'maxCountsPerSecond'.");
+    UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_minTimeThreshold, minTimeThreshold, cmock_line, "Function 'newAutoRateAverage' called with unexpected value for argument 'minTimeThreshold'.");
   }
   {
     UNITY_TEST_ASSERT_EQUAL_INT(cmock_call_instance->Expected_autoRate, autoRate, cmock_line, "Function 'newAutoRateAverage' called with unexpected value for argument 'autoRate'.");
@@ -182,24 +182,24 @@ AutoRateAverage* newAutoRateAverage(float initialAverage, int sampleRate, int ma
   return cmock_call_instance->ReturnVal;
 }
 
-void CMockExpectParameters_newAutoRateAverage(CMOCK_newAutoRateAverage_CALL_INSTANCE* cmock_call_instance, float initialAverage, int sampleRate, int maxCountsPerSecond, BOOL autoRate, AutoRateSetting autoRateSetting, int fixedRate)
+void CMockExpectParameters_newAutoRateAverage(CMOCK_newAutoRateAverage_CALL_INSTANCE* cmock_call_instance, float initialAverage, int sampleRate, int minTimeThreshold, BOOL autoRate, AutoRateSetting autoRateSetting, int fixedRate)
 {
   cmock_call_instance->Expected_initialAverage = initialAverage;
   cmock_call_instance->Expected_sampleRate = sampleRate;
-  cmock_call_instance->Expected_maxCountsPerSecond = maxCountsPerSecond;
+  cmock_call_instance->Expected_minTimeThreshold = minTimeThreshold;
   cmock_call_instance->Expected_autoRate = autoRate;
   memcpy(&cmock_call_instance->Expected_autoRateSetting, &autoRateSetting, sizeof(AutoRateSetting));
   cmock_call_instance->Expected_fixedRate = fixedRate;
 }
 
-void newAutoRateAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, float initialAverage, int sampleRate, int maxCountsPerSecond, BOOL autoRate, AutoRateSetting autoRateSetting, int fixedRate, AutoRateAverage* cmock_to_return)
+void newAutoRateAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, float initialAverage, int sampleRate, int minTimeThreshold, BOOL autoRate, AutoRateSetting autoRateSetting, int fixedRate, AutoRateAverage* cmock_to_return)
 {
   CMOCK_MEM_INDEX_TYPE cmock_guts_index = CMock_Guts_MemNew(sizeof(CMOCK_newAutoRateAverage_CALL_INSTANCE));
   CMOCK_newAutoRateAverage_CALL_INSTANCE* cmock_call_instance = (CMOCK_newAutoRateAverage_CALL_INSTANCE*)CMock_Guts_GetAddressFor(cmock_guts_index);
   UNITY_TEST_ASSERT_NOT_NULL(cmock_call_instance, cmock_line, "CMock has run out of memory. Please allocate more.");
   Mock.newAutoRateAverage_CallInstance = CMock_Guts_MemChain(Mock.newAutoRateAverage_CallInstance, cmock_guts_index);
   cmock_call_instance->LineNumber = cmock_line;
-  CMockExpectParameters_newAutoRateAverage(cmock_call_instance, initialAverage, sampleRate, maxCountsPerSecond, autoRate, autoRateSetting, fixedRate);
+  CMockExpectParameters_newAutoRateAverage(cmock_call_instance, initialAverage, sampleRate, minTimeThreshold, autoRate, autoRateSetting, fixedRate);
   cmock_call_instance->ReturnVal = cmock_to_return;
 }
 

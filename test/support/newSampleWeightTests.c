@@ -7,6 +7,6 @@ void calcNewSampleWeightTest(RunningAverage *ra, float *testAverages, float *cor
     int i;
     for(i = 0; testAverages[i] > 0.001; i++) {
         ra->average = testAverages[i];
-        TEST_ASSERT_FLOAT_WITHIN(0.5, correctWeights[i], runningAverageCalcNewSampleWeight(ra));
+        verboseAssertFloatWithin(0.5, correctWeights[i], runningAverageCalcNewSampleWeight(ra));
     }
 }

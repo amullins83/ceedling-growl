@@ -1,7 +1,6 @@
 require "plugin"
 require "constants"
 require "ruby_gntp"
-#require "YAML"
 
 module CeedlingGrowlModule
 

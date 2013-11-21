@@ -91,7 +91,6 @@
 #define MIPSEL
 #endif
 
-
 #include <plib.h>
 #include <stdlib.h>
 #include <string.h>
@@ -126,6 +125,9 @@
 #include "instrument_constants.h"
 #include "reading_calculation.h"
 #include "type_instrument.h"
+#include "time_constants.h"
+#include "model_constants.h"
+
 
 //**************************************************************************************************
 //**************************************************************************************************

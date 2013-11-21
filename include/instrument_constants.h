@@ -1,6 +1,8 @@
 #ifndef INSTRUMENT_CONSTANTS_H
 #define INSTRUMENT_CONSTANTS_H
 
+#include "GenericTypeDefs.h"
+
 typedef struct
 {
     float coefficient;
@@ -11,15 +13,9 @@ typedef struct
 {
     float squareFactor;
     float rangeFactor;
-    float magnitude;
+    UINT16 magnitude;
     RangeHysteresisTimeConstants fixedTimeConstants;
     RangeHysteresisTimeConstants autoTimeConstants;
-    float newRateWeight;
-    float minTime;
-    float maxTime;
-    int isFixedTime;
-    float fixedTime;
-    int max_uR;
 } RangeConstants;
 
 typedef int CalConstant;
@@ -34,33 +30,25 @@ typedef struct
     float over_range_voltage;
     int current_range;
     int id;
-    int sampleRate;
 } InstrumentConstants;
 
 InstrumentConstants *newConstants(int id);
 
-InstrumentConstants *newM9DPconstants(int id);
 
 
 
 void instrumentConstantsSetCalConstantForRange(InstrumentConstants *ic, int range, CalConstant c);
 int  instrumentConstantsGetCurrentRange(InstrumentConstants *ic);
 void instrumentConstantsSetCurrentRange(InstrumentConstants *ic, int range);
-void instrumentConstantsSetMinTime(InstrumentConstants *ic, int minTime);
-void instrumentConstantsSetMaxTime(InstrumentConstants *ic, int maxTime);
 
 CalConstant instrumentConstantsGetCurrentCal(InstrumentConstants *ic);
 
 float instrumentConstantsGetRangeFactor(InstrumentConstants *ic);
 float instrumentConstantsGetSquareFactor(InstrumentConstants *ic);
-float instrumentConstantsGetMagnitude(InstrumentConstants *ic);
+UINT16 instrumentConstantsGetMagnitude(InstrumentConstants *ic);
 float instrumentConstantsGetCoefficient(InstrumentConstants *ic);
 float instrumentConstantsGetRate(InstrumentConstants *ic);
-float instrumentConstantsGetWeight(InstrumentConstants *ic);
-float   instrumentConstantsGetMinTime(InstrumentConstants *ic);
-float   instrumentConstantsGetMaxTime(InstrumentConstants *ic);
-int   instrumentConstantsGetSampleRate(InstrumentConstants *ic);
-int   instrumentConstantsGetMaxUR(InstrumentConstants *ic);
-float   instrumentConstantsGetFixedTime(InstrumentConstants *ic);
+
+void setDefaultRangeConstants(RangeConstants *rc, int correction_factor);
 
 #endif

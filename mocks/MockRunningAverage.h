@@ -13,12 +13,12 @@ void MockRunningAverage_Verify(void);
 
 #define newDefaultRunningAverage_ExpectAndReturn(cmock_retval) newDefaultRunningAverage_CMockExpectAndReturn(__LINE__, cmock_retval)
 void newDefaultRunningAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* cmock_to_return);
-#define newRunningAverage_ExpectAndReturn(initialAverage, sampleRate, minTime, maxTime, maxCountsPerSecond, cmock_retval) newRunningAverage_CMockExpectAndReturn(__LINE__, initialAverage, sampleRate, minTime, maxTime, maxCountsPerSecond, cmock_retval)
-void newRunningAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, float initialAverage, int sampleRate, int minTime, int maxTime, int maxCountsPerSecond, RunningAverage* cmock_to_return);
+#define newRunningAverage_ExpectAndReturn(initialAverage, sampleRate, minTime, maxTime, minTimeThreshold, cmock_retval) newRunningAverage_CMockExpectAndReturn(__LINE__, initialAverage, sampleRate, minTime, maxTime, minTimeThreshold, cmock_retval)
+void newRunningAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, float initialAverage, int sampleRate, int minTime, int maxTime, int minTimeThreshold, RunningAverage* cmock_to_return);
 #define initDefaultRunningAverage_Expect(ra) initDefaultRunningAverage_CMockExpect(__LINE__, ra)
 void initDefaultRunningAverage_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra);
-#define initRunningAverage_Expect(ra, initialAverage, sampleRate, minTime, maxTime, maxCountsPerSecond) initRunningAverage_CMockExpect(__LINE__, ra, initialAverage, sampleRate, minTime, maxTime, maxCountsPerSecond)
-void initRunningAverage_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, float initialAverage, int sampleRate, int minTime, int maxTime, int maxCountsPerSecond);
+#define initRunningAverage_Expect(ra, initialAverage, sampleRate, minTime, maxTime, minTimeThreshold) initRunningAverage_CMockExpect(__LINE__, ra, initialAverage, sampleRate, minTime, maxTime, minTimeThreshold)
+void initRunningAverage_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, float initialAverage, int sampleRate, int minTime, int maxTime, int minTimeThreshold);
 #define runningAverageGetNewSample_ExpectAndReturn(ra, cmock_retval) runningAverageGetNewSample_CMockExpectAndReturn(__LINE__, ra, cmock_retval)
 void runningAverageGetNewSample_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return);
 #define runningAverageSetNewSample_Expect(ra, sample) runningAverageSetNewSample_CMockExpect(__LINE__, ra, sample)
@@ -33,14 +33,14 @@ void runningAverageSetSampleRate_CMockExpect(UNITY_LINE_TYPE cmock_line, Running
 void runningAverageSetMaxTime_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int max);
 #define runningAverageSetMinTime_Expect(ra, min) runningAverageSetMinTime_CMockExpect(__LINE__, ra, min)
 void runningAverageSetMinTime_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int min);
-#define runningAverageGetBackgroundCountsPerSecond_ExpectAndReturn(ra, cmock_retval) runningAverageGetBackgroundCountsPerSecond_CMockExpectAndReturn(__LINE__, ra, cmock_retval)
-void runningAverageGetBackgroundCountsPerSecond_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return);
-#define runningAverageSetBackgroundCountsPerSecond_Expect(ra, background) runningAverageSetBackgroundCountsPerSecond_CMockExpect(__LINE__, ra, background)
-void runningAverageSetBackgroundCountsPerSecond_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int background);
-#define runningAverageGetMaxCountsPerSecond_ExpectAndReturn(ra, cmock_retval) runningAverageGetMaxCountsPerSecond_CMockExpectAndReturn(__LINE__, ra, cmock_retval)
-void runningAverageGetMaxCountsPerSecond_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return);
-#define runningAverageSetMaxCountsPerSecond_Expect(ra, max) runningAverageSetMaxCountsPerSecond_CMockExpect(__LINE__, ra, max)
-void runningAverageSetMaxCountsPerSecond_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int max);
+#define runningAverageGetMaxTimeThreshold_ExpectAndReturn(ra, cmock_retval) runningAverageGetMaxTimeThreshold_CMockExpectAndReturn(__LINE__, ra, cmock_retval)
+void runningAverageGetMaxTimeThreshold_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return);
+#define runningAverageSetMaxTimeThreshold_Expect(ra, background) runningAverageSetMaxTimeThreshold_CMockExpect(__LINE__, ra, background)
+void runningAverageSetMaxTimeThreshold_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int background);
+#define runningAverageGetMinTimeThreshold_ExpectAndReturn(ra, cmock_retval) runningAverageGetMinTimeThreshold_CMockExpectAndReturn(__LINE__, ra, cmock_retval)
+void runningAverageGetMinTimeThreshold_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return);
+#define runningAverageSetMinTimeThreshold_Expect(ra, max) runningAverageSetMinTimeThreshold_CMockExpect(__LINE__, ra, max)
+void runningAverageSetMinTimeThreshold_CMockExpect(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int max);
 #define runningAverageCalcNumSpeeds_ExpectAndReturn(ra, cmock_retval) runningAverageCalcNumSpeeds_CMockExpectAndReturn(__LINE__, ra, cmock_retval)
 void runningAverageCalcNumSpeeds_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, RunningAverage* ra, int cmock_to_return);
 

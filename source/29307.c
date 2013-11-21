@@ -88,14 +88,14 @@ int main(void)
 {
     TopLevelInitialize();
 
-    while(1) {
-        MainLoop();
-    }
+    MainLoop();
 
     return 0;
 }
 
 void TopLevelInitialize(void) {
+    
+    
     SystemInit();                                                                                   // initialize system (processor specific)
     I2CInit();                                                                                      // initialize I2C devices
     AudioInit();
@@ -107,6 +107,7 @@ void TopLevelInitialize(void) {
     MemoryInit();                                                                                   // initialize external memory
     DisplayInit();                                                                                  // initialize display
     EEPROM_Initialize(FALSE);                                                                       // initialize EEPROMs
+    
     HVBInit();                                                                                      // initialize electrometer
     SchemeInit();                                                                                   // initialize schemes
     VariableInit();                                                                                 // initialize variables
@@ -116,26 +117,31 @@ void TopLevelInitialize(void) {
     if(RCONbits.SWR == TRUE)
         RCONbits.SWR = FALSE;
 
-    ic = newConstants(atoi((const char *)lmi.settings.product.info.serial_number));
+    ic = newConstants(atoi(DEFAULT_SERIAL_NUMBER));
+    instrumentConstantsGetCalibration(ic);
+
+    GlobalReadingAverage = newRunningAverage(10.0, getCurrentTimeConstants());
 }
 
 void MainLoop(void) {
-    Check_for_Restart();
-    Check_Audio_Status();
-    Check_USB_Port();
-//  GOLDrawCallback();                                                                          // added in place of GOLDraw (v1.01.05) [moved above Check_Messages() (v1.01.08)]
-    GOLDraw();                                                                                    // Changed back to GOLDraw, because circumventing it makes no sense.
-    Check_Messages();
-
-    // These functions need to be interruptable, so they are here instead of inside an ISR
-    One_Second_Updates();
-    Check_for_Temperature_Reading();
-    // End interruptable ISR's
-
-    // In contrast, UpdateReading will not be interrupted
-    UpdateReading();
-    Adjust_Audio();
-    Adjust_Peak_Value();
+    while(1) {
+        Check_for_Restart();
+        Check_Audio_Status();
+        Check_USB_Port();
+//      GOLDrawCallback();                                                                          // added in place of GOLDraw (v1.01.05) [moved above Check_Messages() (v1.01.08)]
+        GOLDraw();                                                                                    // Changed back to GOLDraw, because circumventing it makes no sense.
+        Check_Messages();
+    
+        // These functions need to be interruptable, so they are here instead of inside an ISR
+        One_Second_Updates();
+        Check_for_Temperature_Reading();
+        // End interruptable ISR's
+    
+        
+        UpdateReading();
+        Adjust_Audio();
+        Adjust_Peak_Value();
+    }
 }
 
 void One_Second_Updates(void) {
@@ -162,7 +168,7 @@ void Check_for_Temperature_Reading(void) {
 }
 
 void UpdateReading(void) {
-    INTEnable(INT_T1, 0);                                                                       // disable timer 1 interrupt
+   INTEnable(INT_T1, 0);                                                                       // disable timer 1 interrupt
     if(Update_Electrometer_Average == TRUE)
     {
         ReadingCalculation();                                                                 // refactored (v1.04.00)
@@ -172,7 +178,7 @@ void UpdateReading(void) {
     {            
         TakeADCReading();
     }
-    INTEnable(INT_T1, 1);
+   INTEnable(INT_T1, 1);
 }
 
 void TakeADCReading(void) {
@@ -184,7 +190,7 @@ void TakeADCReading(void) {
         if(ADCReading > ADCReading_Peak)                                                    // ...if the new ADC reading is greater than the previous ADC reading... (v1.01.05)
         {
             ADCReading_Peak = ADCReading;                                                   //    ...store the new ADC reading (v1.01.05)
-            Peak_Voltage = (ADCReading / 4095.0) * 2.5 - 0.200;;                                        //    ...calculate the peak voltage (v1.01.05)
+            Peak_Voltage = (ADCReading / 4095.0) * 2.5 - 0.200;                                        //    ...calculate the peak voltage (v1.01.05)
         }
     }
 }
@@ -239,41 +245,6 @@ void AudioInit(void)
     Audio_Mute = TRUE;                                                                              // audio is mute
     return;
 }
-
-// void Mute()
-// {
-//  Audio_IO_OutLAT = Audio_IO_OutLAT & MUTE_AUDIO;
-//  WriteAudio();
-//  Audio_Mute = TRUE;
-// }
-
-// void Unmute()
-// {
-//  Audio_IO_OutLAT = Audio_IO_OutLAT | UNMUTE_AUDIO;
-//  WriteAudio();
-//  Audio_Mute = FALSE;
-// }
-
-
-// void BeepNTimes(int times, int millis)
-// {
-//  int i;
-//  for(i = 0; i < times; i++)
-//      BeepOnce(millis);
-// }
-
-// void BeepOnce(int millis)
-// {
-//  int halfCycle = millis/2;
-
-//  Audio_IO_OutLAT = Audio_IO_OutLAT | UNMUTE_AUDIO | ENABLE_ALARM;
-//  WriteAudio();
-//  DelayMs(halfCycle);
-
-//  Audio_IO_OutLAT = Audio_IO_OutLAT & MUTE_AUDIO & DISABLE_ALARM;
-//  WriteAudio();
-//  DelayMs(halfCycle);
-// }
 
 //*
 //**************************************************************************************************
@@ -405,6 +376,7 @@ void StructureInit(void)
     {
         for(index = 0; index < NUMBER_OF_RANGES; index++)
             lmi.display.detector[detector_index].calibration.info.u_arg[index] = lmi.calibration.constants.info.range[index];
+
         lmi.display.detector[detector_index].calibration.info.u_arg[6] = lmi.calibration.high_voltage_board.info.meter_offset_gain_1;
         lmi.display.detector[detector_index].calibration.info.u_arg[7] = lmi.calibration.high_voltage_board.info.meter_offset_gain_2;
         lmi.display.detector[detector_index].calibration.info.u_arg[8] = lmi.calibration.high_voltage_board.info.meter_offset_gain_3;
@@ -1261,39 +1233,12 @@ void HVBUpdateOffset(BOOL eeprom)
 
 void Update_Temperature_Correction(void)
 {
-    float temp_difference = 0.0;
+    float temp_difference = Temperature_Reading - lmi.calibration.high_voltage_board.info.cal_temperature;
 
-    temp_difference = Temperature_Reading - lmi.calibration.high_voltage_board.info.cal_temperature;
-
-    if(Temperature_Reading >= lmi.calibration.high_voltage_board.info.cal_temperature)
-    {
-        if(temp_difference < 5.0)
-        {
-            temp_difference_adjust = temp_difference * lmi.calibration.high_voltage_board.info.temperature_offset_hot;
-        }
-        else if(temp_difference < 10.0)
-        {
-            temp_difference_adjust = (temp_difference - 5.0) * lmi.calibration.high_voltage_board.info.temperature_offset_hot_10;
-            temp_difference_adjust += 5.0 * lmi.calibration.high_voltage_board.info.temperature_offset_hot;
-        }
-        else if(temp_difference < 15.0)
-        {
-            temp_difference_adjust = (temp_difference - 10.0) * lmi.calibration.high_voltage_board.info.temperature_offset_hot_15;
-            temp_difference_adjust += 5.0 * lmi.calibration.high_voltage_board.info.temperature_offset_hot_10;
-            temp_difference_adjust += 5.0 * lmi.calibration.high_voltage_board.info.temperature_offset_hot;
-        }
-        else
-        {
-            temp_difference_adjust = (temp_difference - 15.0) * lmi.calibration.high_voltage_board.info.temperature_offset_hot_20;
-            temp_difference_adjust += 5.0 * lmi.calibration.high_voltage_board.info.temperature_offset_hot_15;
-            temp_difference_adjust += 5.0 * lmi.calibration.high_voltage_board.info.temperature_offset_hot_10;
-            temp_difference_adjust += 5.0 * lmi.calibration.high_voltage_board.info.temperature_offset_hot;
-        }
-    }
+    if ( temp_difference >= 0.0 )
+        temp_difference_adjust = temp_difference * lmi.calibration.high_voltage_board.info.temperature_offset_hot;
     else
         temp_difference_adjust = temp_difference * lmi.calibration.high_voltage_board.info.temperature_offset_cold;
-
-    return;
 }
 
 void Adjust_Audio(void) {

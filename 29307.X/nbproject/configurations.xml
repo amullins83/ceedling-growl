@@ -157,6 +157,8 @@
       <itemPath>../source/electrometer.c</itemPath>
       <itemPath>../source/models.c</itemPath>
       <itemPath>../source/interrupt_routines.c</itemPath>
+      <itemPath>../source/time_constants.c</itemPath>
+      <itemPath>../source/model_constants.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -247,7 +249,7 @@
         <property key="extra-lib-directories" value="../../lib;.."/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
-        <property key="heap-size" value="6144"/>
+        <property key="heap-size" value="24576"/>
         <property key="input-libraries" value=""/>
         <property key="linker-symbols" value=""/>
         <property key="map-file" value="&quot;${DISTDIR}/29307.X.${IMAGE_TYPE}.map&quot;"/>
@@ -256,7 +258,7 @@
         <property key="preprocessor-macros" value=""/>
         <property key="remove-unused-sections" value="false"/>
         <property key="report-memory-usage" value="false"/>
-        <property key="stack-size" value="3072"/>
+        <property key="stack-size" value="6144"/>
         <property key="symbol-stripping" value=""/>
         <property key="trace-symbols" value=""/>
         <property key="warn-section-align" value="false"/>

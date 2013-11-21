@@ -7,6 +7,8 @@
 #include "peripheral/timer.h"
 #include "peripheral/outcompare.h"
 #include "electrometer.h"
+#include "new.h"
+#include "time_constants.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -29,8 +31,10 @@ extern BOOL Update_Arc_Flag;
 extern BOOL Update_Display_Rate_Flag;
 
 extern InstrumentConstants *ic;
+extern RunningAverage *GlobalReadingAverage;
 
 // Definitions
+
 float applySquare(float input, InstrumentConstants *instrument) {
     float coefficient = instrumentConstantsGetSquareFactor(instrument);
     return input*(1.0 + coefficient*input);
@@ -52,7 +56,7 @@ float readingFromVolts(float volts, InstrumentConstants *instrument) {
     float adjustedVolts, rawReading;
     adjustedVolts = instrument->current_range < 4 ? volts : applySquare(volts, instrument);
     rawReading = applyRange(adjustedVolts, instrument);
-    return applyCalibration(rawReading, instrument);
+    return rawReading;
 }
 
 void readingReset(void) {
@@ -62,16 +66,13 @@ void readingReset(void) {
         Reset_Level = FALSE;                                                                                            // clear reset flag
 }
 
-float readingAverage(float newReading, float currentAverage, InstrumentConstants *ic) {
-    RunningAverage ra;
-    initRunningAverage( &ra, currentAverage,
-                        instrumentConstantsGetSampleRate(ic),
-                        instrumentConstantsGetMinTime(ic),
-                        instrumentConstantsGetMaxTime(ic),
-                        instrumentConstantsGetMaxUR(ic));
-    runningAverageSetNewSampleFloat(&ra, newReading);
-    return ra.average;
+
+float readingAverage(float newReading, TimeConstants tc) {
+    runningAverageSetTimeConstants(GlobalReadingAverage, tc);
+    runningAverageSetNewSampleFloat(GlobalReadingAverage, newReading);
+    return runningAverageGetAverage(GlobalReadingAverage);
 }
+
 
 float voltsFromADC(UINT32 reading) {
     return (reading / 4095.0) * 2.5 - 0.200;
@@ -86,12 +87,22 @@ void setADC(UINT32 newADC) {
         ADCReadingAverage = newADC;
 }
 
+float getReadingAverage() {
+    return runningAverageGetAverage(GlobalReadingAverage);
+}
+
 void doReadingCalculation(InstrumentConstants *instrument) {
-    float signalvolts = voltsFromADC(readADC());
+    static int lastRange = 0;
+
+    if(lastRange != instrument->current_range) {
+        runningAverageSetTimeConstants(GlobalReadingAverage, getCurrentTimeConstants());
+        lastRange = instrument->current_range;
+    }
+
+    float signalvolts = voltsFromADC(ADCReadingAverage);
     BOOL Over_Range = FALSE;
     float new_rate_uR;
  
-
     if((signalvolts > instrument->over_range_voltage) && (lmi.calibration.controls.info.fixed_range == 0))                      // (v1.01.24 / v1.04.00 added instrument)
     {
         Over_Range = TRUE;                                                                                          // new reading is over range
@@ -106,7 +117,8 @@ void doReadingCalculation(InstrumentConstants *instrument) {
         Rate_uR_hr = new_rate_uR;                                                                           // (v1.02.04)
     else
     {
-        Rate_uR_hr = readingAverage(new_rate_uR, Rate_uR_hr, instrument);
+        runningAverageSetNewSampleFloat(GlobalReadingAverage, new_rate_uR);
+        Rate_uR_hr = runningAverageGetAverage(GlobalReadingAverage);
     }                                                                                                 // (v1.02.04)
 
     if(Update_Audio_Flag)
@@ -148,6 +160,4 @@ void ReadingCalculation()
         readingReset();
     else
         doReadingCalculation(ic);
-
-    return;
 }

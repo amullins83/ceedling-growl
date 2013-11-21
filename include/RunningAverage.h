@@ -13,23 +13,21 @@
 #ifndef __RUNNING_AVERAGE_H
 #define __RUNNING_AVERAGE_H
 
+#include "time_constants.h"
+
 typedef struct {
     int newSample;
     float average;
-    float minTime;
-    float maxTime;
-    int sampleRate;
-    int backgroundCountsPerSecond;
-    int maxCountsPerSecond;
+    TimeConstants tc;
     int numSpeeds;
     float newSampleWeight;
 } RunningAverage;
 
 RunningAverage *newDefaultRunningAverage(void);
-RunningAverage *newRunningAverage(float initialAverage, int sampleRate, float minTime, float maxTime, int maxCountsPerSecond);
+RunningAverage *newRunningAverage(float initialAverage, TimeConstants tc);
 
 void  initDefaultRunningAverage(RunningAverage *ra);
-void  initRunningAverage(RunningAverage *ra, float initialAverage, int sampleRate, float minTime, float maxTime, int maxCountsPerSecond);
+void  initRunningAverage(RunningAverage *ra, float initialAverage, TimeConstants tc);
 
 int   runningAverageGetNewSample(RunningAverage *ra);
 void  runningAverageSetNewSample(RunningAverage *ra, int sample);
@@ -42,13 +40,15 @@ void  runningAverageSetSampleRate(RunningAverage *ra, int rate);
 void  runningAverageSetMaxTime(RunningAverage *ra, float max);
 void  runningAverageSetMinTime(RunningAverage *ra, float min);
 
-int   runningAverageGetBackgroundCountsPerSecond(RunningAverage *ra);
-void  runningAverageSetBackgroundCountsPerSecond(RunningAverage *ra, int background);
+int   runningAverageGetMaxTimeThreshold(RunningAverage *ra);
+void  runningAverageSetMaxTimeThreshold(RunningAverage *ra, int threshold);
 
-int   runningAverageGetMaxCountsPerSecond(RunningAverage *ra);
-void  runningAverageSetMaxCountsPerSecond(RunningAverage *ra, int max);
+int   runningAverageGetMinTimeThreshold(RunningAverage *ra);
+void  runningAverageSetMinTimeThreshold(RunningAverage *ra, int threshold);
 
 
 int   runningAverageCalcNumSpeeds(RunningAverage *ra);
+
+void  runningAverageSetTimeConstants(RunningAverage *ra, TimeConstants tc);
 
 #endif

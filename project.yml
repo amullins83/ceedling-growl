@@ -142,6 +142,14 @@
       - -Llib
       - -Os
 
+:autorake:
+  :paths:
+    - tests
+    - source
+    - src
+    - include
+    - lib
+    - common
 
 :plugins:
   :load_paths:

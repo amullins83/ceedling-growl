@@ -1,7 +1,8 @@
-:paths:
-    - tests
-    - source
-    - src
-    - include
-    - lib
-    - common
+:autorake:
+    :paths:
+        - tests
+        - source
+        - src
+        - include
+        - lib
+        - common

@@ -52,7 +52,7 @@ void Update_Range(void)
         BYTE i;
         RelativeAdjustment rels;
 
-        float rate_result = GetRateResult();   // n1 Moved rate_result calculation to GetRateResult function
+        float rate_result;
 
         if(lmi.calibration.controls.info.fixed_range == 0)  // n1 Skip processing if we're in fixed-range mode.
         {
@@ -61,6 +61,8 @@ void Update_Range(void)
             else
                 start_range = 1;             // n1 otherwise start from lowest range every time.
 
+            rate_result = GetRateResult();   // n1 Moved rate_result calculation to GetRateResult function
+            
             for(i = start_range; i <= NUMBER_OF_RANGES; i++)  // n1 main process loop. Scan ranges to find the best match.
             {
                 rels = GetRelativeAdjustment(i);
@@ -70,11 +72,14 @@ void Update_Range(void)
                     {
                         Range_Number = i;                        // n1 set Range
                         Rate_Divide_By = rels.conversion;    // n1 set rate unit conversion factor.
-                        i = NUMBER_OF_RANGES;                    // force early exit from loop. n1 Moved inside if statement because the alternative made no sense.
+                        break;                    // force early exit from loop. n1 Moved inside if statement because the alternative made no sense.
                     }
                         
                 }
             }
+
+            if(i == NUMBER_OF_RANGES + 1)
+                Range_Number = NUMBER_OF_RANGES;
 
             if(Last_Range != Range_Number)
             {
@@ -89,7 +94,6 @@ void Update_Range(void)
             if(Last_Range != Range_Number)  // n1 If the range changed
             {
                 Rate_uR_hr = 0.0;                                                                                                           // new fixed range, start fresh
-                rate_result = 0.0;                                                                                                          // new fixed range, start fresh
                 Change_Range(Range_Number);                                                                                                 // change range
             }
         }
@@ -126,49 +130,47 @@ RelativeAdjustment GetRelativeAdjustment(BYTE range) {
 
 void Change_Range(BYTE new_range)
 {
-    switch(new_range)
-    {
-        case 1:
-        {
-            Electrometer_Switches = Range_1;                                                                                // set Range
-            break;
-        }
-        case 2:
-        {
-            Electrometer_Switches = Range_10;                                                                               // set Range
-            break;
-        }
-        case 3:
-        {
-            Electrometer_Switches = Range_100;                                                                              // set Range
-            break;
-        }
-        case 4:
-        {
-            Electrometer_Switches = Range_1K;                                                                               // set Range
-            break;
-        }
-        case 5:
-        {
-            Electrometer_Switches = Range_10K;                                                                              // set Range
-            break;
-        }
-        default:
-        {
-            return;
-        }
-    }
-    // if(new_range < 1 || new_range > 5)
-    //     return;
-    // else
-    //     Electrometer_Switches = (BYTE[]){Range_1, Range_10, Range_100, Range_1K, Range_10K}[new_range - 1];
+    // switch(new_range)
+    // {
+    //     case 1:
+    //     {
+    //         Electrometer_Switches = Range_1;                                                                                // set Range
+    //         break;
+    //     }
+    //     case 2:
+    //     {
+    //         Electrometer_Switches = Range_10;                                                                               // set Range
+    //         break;
+    //     }
+    //     case 3:
+    //     {
+    //         Electrometer_Switches = Range_100;                                                                              // set Range
+    //         break;
+    //     }
+    //     case 4:
+    //     {
+    //         Electrometer_Switches = Range_1K;                                                                               // set Range
+    //         break;
+    //     }
+    //     case 5:
+    //     {
+    //         Electrometer_Switches = Range_10K;                                                                              // set Range
+    //         break;
+    //     }
+    //     default:
+    //     {
+    //         return;
+    //     }
+    // }
+    if(new_range < 1 || new_range > 5)
+        return;
+    else
+        Electrometer_Switches = (BYTE[]){Range_1, Range_10, Range_100, Range_1K, Range_10K}[new_range - 1];
 
     instrumentConstantsSetCurrentRange(ic, new_range);
     i2c2Write(i2cADDR_HV_IO_0x48, 0x0A, 1, Electrometer_Switches, 1);                                                       // write to the OLAT Register
     DelayMs(10);                                                                                                            // allow for some settling time
     HVBUpdateOffset(FALSE);                                                                                                 // update meteroffset
-
-    return;
 }
 
 //*

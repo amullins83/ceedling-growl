@@ -10496,8 +10496,7 @@ BOOL Functions_Time_Constants_Handler(BYTE function_index, BYTE type) {
 	BYTE process = 0;
 	BYTE value;
 	BYTE index;
-	float f_value;
-
+	
 	process = Process_Handler();
 	if(process != COMMAND_ERROR)
 	{
@@ -10522,29 +10521,21 @@ BOOL Functions_Time_Constants_Handler(BYTE function_index, BYTE type) {
 					message = Parse_Message(NULL);
 					if(message != NULL)
 					{
-						f_value = atof(message);
-						lmi.function[function_index].info.time_constant.range[index] = f_value;
+						value = atoi(message);
+						lmi.function[function_index].info.time_constant.range[index] = value;
 					}
 					else
 						return FALSE;
 				}
 				else if(process == COMMAND_RESET)
 				{
-					lmi.function[function_index].info.time_constant.range[index] = 0.0;
+					lmi.function[function_index].info.time_constant.range[index] = 1;
 				}
 				else if(process == COMMAND_READ)
 				{
 					Write_EEPROM = FALSE;
 				}
-				if(f_value < 1.0 / instrumentConstantsGetSampleRate(ic))
-				{
-					// Auto Mode
-					ic->rangeConstants[index].isFixedTime = FALSE;
-				}
-				else {
-					ic->rangeConstants[index].isFixedTime = TRUE;
-					ic->rangeConstants[index].fixedTime = f_value;
-				}
+				
 				sprintf((char *)tier_command,"%d\r\n\0", lmi.function[function_index].info.time_constant.range[index]);
 				strcat((char *)USB_TXMessage, tier_command);
 				return TRUE;

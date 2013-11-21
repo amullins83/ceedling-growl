@@ -11,8 +11,8 @@ void Mockautorate_Verify(void);
 
 
 
-#define newAutoRateAverage_ExpectAndReturn(initialAverage, sampleRate, maxCountsPerSecond, autoRate, autoRateSetting, fixedRate, cmock_retval) newAutoRateAverage_CMockExpectAndReturn(__LINE__, initialAverage, sampleRate, maxCountsPerSecond, autoRate, autoRateSetting, fixedRate, cmock_retval)
-void newAutoRateAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, float initialAverage, int sampleRate, int maxCountsPerSecond, BOOL autoRate, AutoRateSetting autoRateSetting, int fixedRate, AutoRateAverage* cmock_to_return);
+#define newAutoRateAverage_ExpectAndReturn(initialAverage, sampleRate, minTimeThreshold, autoRate, autoRateSetting, fixedRate, cmock_retval) newAutoRateAverage_CMockExpectAndReturn(__LINE__, initialAverage, sampleRate, minTimeThreshold, autoRate, autoRateSetting, fixedRate, cmock_retval)
+void newAutoRateAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, float initialAverage, int sampleRate, int minTimeThreshold, BOOL autoRate, AutoRateSetting autoRateSetting, int fixedRate, AutoRateAverage* cmock_to_return);
 #define newDefaultAutoRateAverage_ExpectAndReturn(cmock_retval) newDefaultAutoRateAverage_CMockExpectAndReturn(__LINE__, cmock_retval)
 void newDefaultAutoRateAverage_CMockExpectAndReturn(UNITY_LINE_TYPE cmock_line, AutoRateAverage* cmock_to_return);
 #define autoRateGetAverage_ExpectAndReturn(autoRateAverage, cmock_retval) autoRateGetAverage_CMockExpectAndReturn(__LINE__, autoRateAverage, cmock_retval)

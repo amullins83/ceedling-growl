@@ -1,8 +1,6 @@
 PROJECT_CEEDLING_ROOT = "vendor/ceedling"
-PROJECT_AUTORAKE_ROOT = "vendor/autorake"
 load "#{PROJECT_CEEDLING_ROOT}/lib/rakefile.rb"
-load "#{PROJECT_AUTORAKE_ROOT}/lib/autorake.rb"
-
+require "Autorake"
 
 task :default => %w[ test:all release convert2hex copy2trunk]
 
@@ -15,5 +13,5 @@ task :copy2trunk do
 end
 
 task :auto do
-    Autorake.new
+    Autorake.new "project.yml"
 end

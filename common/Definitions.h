@@ -1905,7 +1905,7 @@ typedef struct __attribute__(( __packed__))
 // Function Time Constants
 typedef struct __attribute__(( __packed__))
 {
-	float range[5];													// The time constants for each range in seconds
+	BYTE range[5];													// The time constants for each range in seconds
 } TYPE_FUNCTION_TIME_CONSTANTS;
 
 //* Function Prototype

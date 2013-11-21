@@ -1251,28 +1251,9 @@ void Check_High_Voltage(BYTE value)
 
 void Check_Temperature(void)
 {
-	BOOL temp_sign;																					// if 1, temperature is < 0 C, if 0, temperature is >= 0 C
-	WORD buffer;
-
-	buffer = i2c2ReadWord(i2cADDR_X_TEMP_0x90, TEMP_REG, 1);										// read i2c temperature sensor temperature register
-
-	if(buffer > 32767)																				// if temperature is negative...
-	{																								// ...convert twos complement
-		buffer = buffer ^ 0xFFFF;																	// ...invert
-		buffer += 1;																				// ...add 1
-		temp_sign = 1;																				// ...set negative sign flag
-	}
-	else																							// else if temperature is zero or positive...
-	{		
-		temp_sign = 0;																				// ...clear negative sign flag
-	}
-
-	Temperature_Reading = ((float) buffer / 16.0) * TEMP_CONST_12BIT;								// mask off necessary data
-
-	if(temp_sign)																					// if temperature is negative...
-		Temperature_Reading *= -1.0;																// ...convert to negative
-
-	return;
+    INT16 tempRead = (INT16)i2c2ReadWord(i2cADDR_X_TEMP_0x90, TEMP_REG, 1); // read i2c temperature sensor temperature register
+    tempRead = tempRead >> 4; // bit shift right 4 (fast divide by 16)
+    Temperature_Reading = tempRead * TEMP_CONST_12BIT; // scale with temperature constant ( output will be in range -128 to 128 exclusive )
 }
 
 //*
@@ -6752,7 +6733,6 @@ void Shutdown_Power(void)
 	i2c2Write(i2cADDR_PIC_RTCC, i2cPIC_RTC_STATUS, 1, SHUTDOWN_CODE, 1);							// signal supervisor to remove power (v1.0.3 supervisor)
 //	PORTSetBits(IOPORT_E, BIT_9);																	// (v1.0.5) (hidden 9DP v1.01.21)
 
-    
 	while(1);																						// hang up program for shutdown to occur
 }
 

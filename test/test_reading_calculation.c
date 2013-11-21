@@ -15,10 +15,13 @@
 #include "for_each.h"
 #include "GenericTypeDefs.h"
 #include "models.h"
+#include "model_constants.h"
 #include "type_Instrument.h"
+#include "time_constants.h"
 
 #include <stdlib.h>
 #include <stdarg.h>
+#include <math.h>
 
 TYPE_INSTRUMENT lmi;
 InstrumentConstants *ic;
@@ -86,9 +89,9 @@ UINT16 Full_Scale_Arc_Range[][2] = {
 };
 
 RunningAverage *runningAverage;
+RunningAverage *GlobalReadingAverage;
 
-
-#define addInstrument(a) instrument[numInstruments++] = newSampleLookup(newM9DPconstants(a))
+#define addInstrument(a) instrument[numInstruments++] = newSampleLookup(newConstants(a))
 
 void setUp(void)
 {
@@ -100,13 +103,21 @@ void setUp(void)
     Peak_Rate_Reading = 10.0;
     Range_Lock = FALSE;
     Range_Lock_Valid = FALSE;
+    TimeConstants *tc = getDefaultTimeConstants();
 
-    runningAverage = newRunningAverage(0.0, 8, 1.25, 1.25, 4000);
+    runningAverage = newRunningAverage(0.0, tc[0]);
+    GlobalReadingAverage = newRunningAverage(0.0, tc[0]);
+        for(i = 0; i < 5; i++) {
+        lmi.display.detector[0].calibration.info.u_arg[i] = (UINT16)1000;
+        lmi.display.detector[0].calibration.info.s_arg[i] = (INT16)0;
+    }
     lmi.settings.product.info.model_number = MODEL_9DP_HIGH_PRESSURE;
     lmi.calibration.controls.info.fixed_range = 0;
     instrument = (SampleLookup **)malloc(sizeof(SampleLookup *)*NUM_RANGES);
     addInstrument(3808);
+    
     addInstrument(4003);
+
     addInstrument(6987);
 
     for(i = 0; i < numInstruments; i++) {
@@ -135,6 +146,7 @@ void tearDown(void)
         deleteSampleLookup(instrument[i]);
     free(instrument);
     free(runningAverage);
+    free(GlobalReadingAverage);
     deleteInstrumentConstants(ic);
     numInstruments = 0;
 }
@@ -148,42 +160,44 @@ void test_sampleLookupAllCorners_looks_at_all_corners(void) {
     TEST_ASSERT_EQUAL(totalCorners, countedCorners);
 }
 
+void test_setUp_sets_ids(void) {
+    int ids[] = {3808, 4003, 6987}, i;
+    for(i = 0; i < numInstruments; i++) {
+        TEST_ASSERT_EQUAL(ids[i], instrument[i]->instrument->id);
+    }
+}
+
 void test_readingFromVolts_performs_the_expected_conversion(void) {
     sampleLookupAllCorners(instrument, numInstruments, expectedConversion);
 }
 
 void checkAverage(SampleLookup **sl, int i, int r, int p) {
-    float Rate_uR_hr = 0.0, tau, rate, weight, reading;
+    float Rate_uR_hr = 0.0, tau, rate, weight, reading, expected, actual, diff;
     InstrumentConstants *ic_average = sl[i]->instrument;
+    TimeConstants *tc = getDefaultTimeConstants();
+
     instrumentConstantsSetCurrentRange(ic_average, r + 1);
-    tau = instrumentConstantsGetMaxTime(ic_average);
-    //printf("Tau: %f\n", tau);
-    rate = instrumentConstantsGetSampleRate(ic_average);
-    //printf("Rate: %f\n", rate);
+    tau = tc[r].maxTime;
+    
+    rate = tc[r].sampleRate;
+    
     weight = 1.0 / tau;
-    //printf("Weight: %f\n", weight);
+    
     reading = sl[i]->range[r][p].reading;
-    //printf("Reading: %f\n", reading);
-    float expected = weight*reading;
-    float actual = readingAverage(reading, Rate_uR_hr, ic_average);
+    
+    expected = weight*reading;
+    GlobalReadingAverage->average = 10.0;
+    actual = readingAverage(reading, tc[r]);
+    diff = actual - expected;
+    if(fabs(diff) > deltaForRange(r)) {
+        printf("Tau: %f\n", tau);
+        printf("Rate: %f\n", rate);
+        printf("Weight: %f\n", weight);
+        printf("Reading: %f\n", reading);
+        printf("Failed instrument %d, range %d, and pair %d, delta is %f\n", i, r + 1, p, diff);
+    }
     verboseAssertFloatWithin(deltaForRange(r), expected, actual);
 }
-
-// void test_readingAverage_is_insane(void) {
-//     char *printedAverage = (char *)malloc(32);
-//     int rate, maxUR;
-//     float minTime, maxTime;
-//     InstrumentConstants *ic = instrument[0]->instrument;
-//     instrumentConstantsSetCurrentRange(ic, 3);
-//     rate = instrumentConstantsGetSampleRate(ic);
-//     minTime = instrumentConstantsGetMinTime(ic);
-//     maxTime = instrumentConstantsGetMaxTime(ic);
-//     maxUR = instrumentConstantsGetMaxUR(ic);
-//     //printf("%s: %d, %s: %f, %s: %f, %s: %d\n", "Rate", rate, "Min", minTime, "Max", maxTime, "MaxUR", maxUR);
-//     s//printf(printedAverage, "%f", readingAverage(25000.0, 30000.0, ic));
-//     TEST_ASSERT_EQUAL_STRING("1.#INF00", printedAverage);
-// }
-
 
 void test_readingAverage_computes_the_weighted_average(void) {
     sampleLookupAllCorners(instrument, numInstruments, checkAverage);
@@ -253,4 +267,23 @@ void test_readingCalculation_setsFlags_on_over_range(void) {
 
     TEST_ASSERT(Update_Arc_Flag);
     TEST_ASSERT(Update_Display_Rate_Flag);
+}
+
+void test_getAverage_gets_global_var(void) {
+    float testAverage = 81.2;
+    GlobalReadingAverage = runningAverage;
+    GlobalReadingAverage->average = testAverage;
+
+    verboseAssertFloatWithin(1.0, testAverage, getReadingAverage());
+}
+
+void test_readingAverage_access_global_var(void) {
+    float testAverage = 8.0;
+    float newReading = 81.2;
+    TimeConstants *tc = getDefaultTimeConstants();
+    GlobalReadingAverage->average = 0.0;
+
+    readingAverage(newReading, tc[instrument[0]->instrument->current_range]);
+
+    verboseAssertFloatWithin(1.0, testAverage, getReadingAverage());
 }

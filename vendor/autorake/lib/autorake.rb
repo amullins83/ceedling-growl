@@ -1,16 +1,16 @@
 require File.expand_path( File.dirname __FILE__ ) + "/autotest"
-require "YAML"
 
 class Autorake
-    def initialize
+    def initialize configFilePath
         @plugin_root = File.expand_path( File.dirname __FILE__ ) + "/.."
-        @config = YAML.load_file(@plugin_root + "/config/autorake.yml")
+        @configFilePath = configFilePath || @plugin_root + "/config/autorake.yml"
+        @config = YAML.load_file(@configFilePath)
         start_watching
     end
 
     private
 
         def start_watching
-            AutoTest.new @config[:paths]
+            AutoTest.new @config[:autorake][:paths]
         end
 end
