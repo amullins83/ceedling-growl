@@ -36,6 +36,7 @@ int forEachCalls = 0;
 
 BOOL   Reset_Level = FALSE;
 float  Rate_uR_hr = 0.0;
+float  new_rate_uR = 0.0;
 UINT32 Period;
 BOOL   Update_Audio_Flag = FALSE;
 BOOL   Update_Arc_Flag = FALSE;
@@ -106,7 +107,9 @@ void setUp(void)
     TimeConstants *tc = getDefaultTimeConstants();
 
     runningAverage = newRunningAverage(0.0, tc[0]);
+
     GlobalReadingAverage = newRunningAverage(0.0, tc[0]);
+
         for(i = 0; i < 5; i++) {
         lmi.display.detector[0].calibration.info.u_arg[i] = (UINT16)1000;
         lmi.display.detector[0].calibration.info.s_arg[i] = (INT16)0;
@@ -137,6 +140,8 @@ void setUp(void)
     Update_Audio_Flag = FALSE;
     Update_Arc_Flag = FALSE;
     Update_Display_Rate_Flag = FALSE;
+    for(i = 0; i < 5; i++)
+        lmi.calibration.constants.info.range[i] = 1000;
 }
 
 void tearDown(void)
@@ -231,34 +236,32 @@ void test_getADCFromReading(void) {
 }
 
 void test_readingCalculation_resets_on_over_range(void) {
-    InstrumentConstants *ic_calc = instrument[0]->instrument;
-    float over_range_volts = ic_calc->over_range_voltage + 0.1;
+    
+    float over_range_volts = ic->over_range_voltage + 0.1;
     float expected, actual, delta = 26.0;
 
-    instrumentConstantsSetCurrentRange(ic_calc, 1);
+    instrumentConstantsSetCurrentRange(ic, 1);
 
-    expected = readingFromVolts(over_range_volts, ic_calc);
+    expected = readingFromVolts(over_range_volts, ic);
 
     setADC(getADCFromReading(over_range_volts));
 
     Update_Range_Expect();
 
     ReadingCalculation();
+    
     actual = Rate_uR_hr;
+    
     verboseAssertFloatWithin(delta, expected, actual);
-
 }
 
 void test_readingCalculation_setsFlags_on_over_range(void) {
-    InstrumentConstants *ic_calc = instrument[0]->instrument;
-    float over_range_volts = ic_calc->over_range_voltage + 0.1;
+    
+    float over_range_volts = ic->over_range_voltage + 0.1;
     float expected;
 
-    instrumentConstantsSetCurrentRange(ic_calc, 1);
-
-    expected = readingFromVolts(over_range_volts, ic_calc);
-    
-
+    instrumentConstantsSetCurrentRange(ic, 1);
+    expected = readingFromVolts(over_range_volts, ic);
     setADC(getADCFromReading(expected));
 
     Update_Range_Expect();
