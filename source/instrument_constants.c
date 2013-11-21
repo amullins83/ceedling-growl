@@ -80,7 +80,7 @@ UINT16 instrumentConstantsGetMagnitude(InstrumentConstants *ic) {
     return ic->rangeConstants[ic->current_range - 1].magnitude;   
 }
 
-void instrumentConstantsGetCalibration(InstrumentConstants *ic) {
+void instrumentConstantsSetCalibration(InstrumentConstants *ic) {
     rangeConstantsGetCalibration(ic->rangeConstants);
 }
 

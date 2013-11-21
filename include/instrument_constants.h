@@ -36,7 +36,7 @@ InstrumentConstants *newConstants(int id);
 
 
 
-
+void InstrumentConstantsSetCalibration(InstrumentConstants *ic);
 void instrumentConstantsSetCalConstantForRange(InstrumentConstants *ic, int range, CalConstant c);
 int  instrumentConstantsGetCurrentRange(InstrumentConstants *ic);
 void instrumentConstantsSetCurrentRange(InstrumentConstants *ic, int range);
