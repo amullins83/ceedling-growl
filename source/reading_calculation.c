@@ -271,7 +271,7 @@ void ReadingCalculation(void)
                 ReadingCorrection();                                                                                    // (v1.02.02)
 
                 if(Over_Range)
-                    Rate_uR_hr = new_rate_uR;
+                    Rate_uR_hr = GlobalReadingAverage->average = new_rate_uR;
                 else {
                     runningAverageSetNewSampleFloat(GlobalReadingAverage, new_rate_uR);
                     Rate_uR_hr = GlobalReadingAverage->average;
@@ -308,7 +308,7 @@ void ReadingCalculation(void)
                 ReadingCorrection();                                                                                    // (v1.02.02)
     
                 if(Over_Range)
-                    Rate_uR_hr = new_rate_uR;
+                    Rate_uR_hr = GlobalReadingAverage->average = new_rate_uR;
                 else {
                     runningAverageSetNewSampleFloat(GlobalReadingAverage, new_rate_uR);
                     Rate_uR_hr = GlobalReadingAverage->average;
@@ -350,7 +350,7 @@ void ReadingCalculation(void)
                 ReadingCorrection();                                                                                    // (v1.02.02)
     
                 if(Over_Range)
-                    Rate_uR_hr = new_rate_uR;
+                    Rate_uR_hr = GlobalReadingAverage->average = new_rate_uR;
                 else {
                     runningAverageSetNewSampleFloat(GlobalReadingAverage, new_rate_uR);
                     Rate_uR_hr = GlobalReadingAverage->average;
